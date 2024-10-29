@@ -14,7 +14,7 @@ const juce::File HRTFProcessor::loadHRTFFile(float azimuth, float elevation)
     azimuthString = (azimuth < 0) ? "-" + azimuthString : azimuthString;
     juce::String elevationString = juce::String(elevation);
     juce::String fileName = "H" + elevationString + "e" + azimuthString + "a.wav";
-    juce::String filePath = juce::File::getCurrentWorkingDirectory().getParentDirectory().getParentDirectory().getFullPathName() + "/plugin/resources/hrtf/elev" + elevationString + "/" + fileName;
+    juce::String filePath = juce::File::getCurrentWorkingDirectory().getParentDirectory().getParentDirectory().getParentDirectory().getParentDirectory().getParentDirectory().getFullPathName() + "/plugin/resources/hrtf/elev" + elevationString + "/" + fileName;
     const juce::File hrtfFile = filePath;
     DBG(hrtfFile.getFullPathName());
     if (!hrtfFile.existsAsFile())
