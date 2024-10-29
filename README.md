@@ -37,12 +37,14 @@ An audio plugin for creating immersive 3D spatial sound experiences using Head-R
 
 ### Usage
 
-1. Load the Plugin: After compiling, load the plugin in a supported DAW or run as a standalone application if built as such.
+1. Load the Plugin:
+   After compiling, load the plugin in a supported DAW or run as a standalone application if built as such.
 2. Control Spatial Parameters:
    - Azimuth: Adjust horizontal angle of the sound source (-180° to 180°).
    - Elevation: Adjust vertical angle of the sound source (-20° to 20°).
    - Distance: Control gain to simulate sound proximity.
-3. HRTF Files: The plugin loads HRTF impulse responses based on the current azimuth and elevation values. Ensure HRTF files are available in the resources/hrtf/ directory.
+3. HRTF Files:
+   The plugin loads HRTF impulse responses based on the current azimuth and elevation values. Ensure HRTF files are available in the resources/hrtf/ directory.
 
 ### Code Overview
 
