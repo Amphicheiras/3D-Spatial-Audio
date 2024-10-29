@@ -20,14 +20,20 @@ An audio plugin for creating immersive 3D spatial sound experiences using Head-R
 ### Installation
 
 1. Clone the repository:
-```sh
-    git clone https://github.com/Amphicheiras/3D-Spatial-Audio.git
-    cd 3D-Spatial-Audio 
-```
+    ```sh
+     git clone https://github.com/Amphicheiras/3D-Spatial-Audio.git
+     cd 3D-Spatial-Audio 
+    ```
 
-3. Open in JUCE Projucer: Open the .jucer project file using JUCE Projucer, configure settings, and export for your target platform (e.g., Visual Studio for Windows or Xcode for macOS).
+2. Configure with CMake:
+   ```sh
+   cmake -S . -B build
+   ```
 
-4. Compile the Plugin: Open the generated project in your chosen IDE, build the plugin, and ensure it compiles without errors.
+3. Compile with CMake:
+   ```sh
+   cmake --build build
+   ```
 
 ### Usage
 
