@@ -1,0 +1,7 @@
+Sync changed from main to branch:
+    Switch to Branch
+        git checkout -your-branch-name
+    Fetch latest changes
+        git fetch origin
+    Merge Main into Branch
+        git merge origin/main

@@ -53,9 +53,18 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
     // XY PAD
     xyPad.registerSlider(&elevationSlider, juce::Gui::XYPad::Axis::Y);
     xyPad.registerSlider(&azimuthSlider, juce::Gui::XYPad::Axis::X);
+    xyPad.onDistanceChanged = [this](double distance)
+    {
+        distanceSlider.setValue(distance, juce::sendNotification);
+    };
+    xyPad.onAngleChanged = [this](double angleDegrees)
+    {
+        azimuthSlider.setValue(angleDegrees, juce::sendNotification);
+        processorRef.apvts.getParameter("azimuth")->setValueNotifyingHost((float)(angleDegrees + 180.0f) / 360.0f);
+    };
     addAndMakeVisible(xyPad);
 
-    setSize(400, 400);
+    setSize(380, 510);
     // setResizable(true, true);
 
     processorRef.apvts.addParameterListener("azimuth", this);
@@ -94,7 +103,7 @@ void AudioPluginAudioProcessorEditor::resized()
 
     // Set the bounds for the XY pad below the knobs
     // Position the XY pad directly below the knobs, taking into account the height and padding
-    xyPad.setBounds(0, knobHeight + padding + 20, getWidth(), getHeight() - (knobHeight + padding + 20)); // Set XY pad below the knobs with extra space
+    xyPad.setBounds(0, knobHeight + padding + 20, getWidth(), getWidth()); // Set XY pad below the knobs with extra space
 }
 
 void AudioPluginAudioProcessorEditor::parameterChanged(const juce::String &parameterID, float newValue)

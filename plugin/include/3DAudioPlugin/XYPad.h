@@ -17,14 +17,17 @@ namespace juce::Gui
         {
         public:
             Thumb();
+            void setXYPad(XYPad *xyPad) { parentXYPad = xyPad; }
             void paint(Graphics &g) override;
             void mouseDown(const MouseEvent &event) override;
             void mouseDrag(const MouseEvent &event) override;
             std::function<void(Point<double>)> moveCallback;
 
         private:
+            XYPad *parentXYPad = nullptr;
             ComponentDragger dragger;
             ComponentBoundsConstrainer constrainer;
+            juce::Image speakerImage;
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Thumb)
         };
@@ -34,6 +37,10 @@ namespace juce::Gui
         void paint(Graphics &g) override;
         void registerSlider(Slider *slider, Axis axis);
         void deregisterSlider(Slider *slider);
+        std::function<void(double)> onDistanceChanged;
+        std::function<void(double)> onAngleChanged;
+
+        double angleDegrees = 0.0;
 
     private:
         void sliderValueChanged(Slider *slider) override;
@@ -42,7 +49,9 @@ namespace juce::Gui
         Thumb thumb;
         std::mutex vectorMutex;
 
-        static constexpr int thumbSize = 40;
+        static constexpr int thumbSize = 128;
+        juce::Image headImage;
+        void thumbPositionChanged(Point<double> position);
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(XYPad)
     };
