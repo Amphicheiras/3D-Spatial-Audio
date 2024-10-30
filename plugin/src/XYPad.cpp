@@ -3,28 +3,21 @@
 namespace juce::Gui
 {
     /*
-     * XY Pad Thumb section
+     * XY Pad Speaker section
      */
-    XYPad::Thumb::Thumb()
+    XYPad::Speaker::Speaker()
     {
-        speakerImage = ImageFileFormat::loadFrom(File(juce::File::getCurrentWorkingDirectory().getParentDirectory().getParentDirectory().getParentDirectory().getParentDirectory().getParentDirectory().getFullPathName() + "/plugin/resources/images/speakerIcon2.png"));
-        constrainer.setMinimumOnscreenAmounts(thumbSize, thumbSize, thumbSize, thumbSize);
+        speakerImage = ImageFileFormat::loadFrom(File(juce::File::getCurrentWorkingDirectory().getParentDirectory().getParentDirectory().getParentDirectory().getParentDirectory().getParentDirectory().getFullPathName() + "/plugin/resources/images/speakerIcon.png"));
+        constrainer.setMinimumOnscreenAmounts(speakerSize, speakerSize, speakerSize, speakerSize);
     }
 
-    void XYPad::Thumb::paint(Graphics &g)
+    void XYPad::Speaker::paint(Graphics &g)
     {
         if (speakerImage.isValid())
         {
-            // float scaledFactor = 0.5f;
-            // auto scaledWidth = static_cast<int>(speakerImage.getWidth() * scaledFactor);
-            // auto scaledHeight = static_cast<int>(speakerImage.getHeight() * scaledFactor);
-            // auto centerX = (getWidth() - scaledWidth) / 2.0f - 32;
-            // auto centerY = (getHeight() - scaledHeight) / 2.0f - 32;
-
-            // Get the angle from the XYPad
+            // get angle from XYPad
             float rotationAngle = static_cast<float>(parentXYPad->angleDegrees) * (juce::MathConstants<float>::pi / 180.0f);
-
-            // Apply rotation transformation around the center of the thumb
+            // apply rotation transformation around the center of the speaker
             AffineTransform transform = AffineTransform::rotation(
                 rotationAngle,
                 getWidth() / 2.0f,
@@ -35,19 +28,19 @@ namespace juce::Gui
         }
     }
 
-    void XYPad::Thumb::mouseDown(const MouseEvent &event)
+    void XYPad::Speaker::mouseDown(const MouseEvent &event)
     {
         dragger.startDraggingComponent(this, event);
     }
 
-    void XYPad::Thumb::mouseDrag(const MouseEvent &event)
+    void XYPad::Speaker::mouseDrag(const MouseEvent &event)
     {
         dragger.dragComponent(this, event, &constrainer);
 
-        // Get the current position of the thumb
+        // Get the current position of the speaker
         auto newPosition = getPosition().toDouble();
-        auto centerX = parentXYPad->getWidth() / 2.0 - thumbSize / 2;
-        auto centerY = parentXYPad->getHeight() / 2.0 - thumbSize / 2;
+        auto centerX = parentXYPad->getWidth() / 2.0 - speakerSize / 2;
+        auto centerY = parentXYPad->getHeight() / 2.0 - speakerSize / 2;
 
         // Calculate the distance from the center
         double dx = newPosition.getX() - centerX;
@@ -55,7 +48,7 @@ namespace juce::Gui
         double distance = std::sqrt(dx * dx + dy * dy);
 
         // Check if the distance is greater than the allowed outter radius
-        double radius = (parentXYPad->getWidth() / 2.0) - (thumbSize / 2.0); // Adjust for thumb size
+        double radius = (parentXYPad->getWidth() / 2.0) - (speakerSize / 2.0); // Adjust for speaker size
         if (distance > radius)
         {
             // Calculate the new position on the circle
@@ -63,7 +56,7 @@ namespace juce::Gui
             newPosition.setXY(centerX + std::cos(angle) * radius, centerY + std::sin(angle) * radius);
         }
         // Check if the distance is lesser than the allowed inner radius
-        double radiusInner = thumbSize; // Adjust for thumb size
+        double radiusInner = speakerSize; // Adjust for speaker size
         if (distance < radiusInner)
         {
             // Calculate the new position on the circle
@@ -71,7 +64,7 @@ namespace juce::Gui
             newPosition.setXY(centerX + std::cos(angle) * radiusInner, centerY + std::sin(angle) * radiusInner);
         }
 
-        // Set the thumb position
+        // Set the speaker position
         setTopLeftPosition(newPosition.toInt());
 
         if (moveCallback)
@@ -79,7 +72,7 @@ namespace juce::Gui
 
         if (parentXYPad != nullptr)
         {
-            parentXYPad->thumbPositionChanged(getPosition().toDouble());
+            parentXYPad->speakerPositionChanged(getPosition().toDouble());
         }
     }
 
@@ -88,15 +81,15 @@ namespace juce::Gui
      */
     XYPad::XYPad()
     {
-        headImage = ImageFileFormat::loadFrom(File(juce::File::getCurrentWorkingDirectory().getParentDirectory().getParentDirectory().getParentDirectory().getParentDirectory().getParentDirectory().getFullPathName() + "/plugin/resources/images/head_above_view.png"));
-        thumb.setXYPad(this);
+        headImage = ImageFileFormat::loadFrom(File(juce::File::getCurrentWorkingDirectory().getParentDirectory().getParentDirectory().getParentDirectory().getParentDirectory().getParentDirectory().getFullPathName() + "/plugin/resources/images/headIcon.png"));
+        speaker.setXYPad(this);
 
-        addAndMakeVisible(thumb);
-        thumb.moveCallback = [&](Point<double> position)
+        addAndMakeVisible(speaker);
+        speaker.moveCallback = [&](Point<double> position)
         {
             const std::lock_guard<std::mutex> lock(vectorMutex);
             const auto bounds = getLocalBounds().toDouble();
-            const auto w = static_cast<double>(thumbSize);
+            const auto w = static_cast<double>(speakerSize);
             for (auto *slider : xSliders)
             {
                 slider->setValue(jmap(position.getX(), 0.0, bounds.getWidth() - w, slider->getMinimum(), slider->getMaximum()));
@@ -110,7 +103,7 @@ namespace juce::Gui
 
     void XYPad::resized()
     {
-        thumb.setBounds(getLocalBounds().withSizeKeepingCentre(thumbSize, thumbSize).withY(getHeight() / 2 - getHeight() / 2));
+        speaker.setBounds(getLocalBounds().withSizeKeepingCentre(speakerSize, speakerSize).withY(getHeight() / 2 - getHeight() / 2));
         if (!xSliders.empty())
             sliderValueChanged(xSliders[0]);
         if (!ySliders.empty())
@@ -158,37 +151,35 @@ namespace juce::Gui
     void XYPad::sliderValueChanged(Slider *slider)
     {
         // Avoid loopback
-        if (thumb.isMouseOverOrDragging(false))
+        if (speaker.isMouseOverOrDragging(false))
             return;
 
         // Figure out if the slider belongs to xSliders or ySliders
         const auto isXAxisSlider = std::find(xSliders.begin(), xSliders.end(), slider) != xSliders.end();
         const auto bounds = getLocalBounds().toDouble();
-        const auto w = static_cast<double>(thumbSize);
+        const auto w = static_cast<double>(speakerSize);
         if (isXAxisSlider)
         {
-            thumb.setTopLeftPosition(
+            speaker.setTopLeftPosition(
                 static_cast<int>(jmap(slider->getValue(), slider->getMinimum(), slider->getMaximum(), 0.0, bounds.getWidth() - w)),
-                thumb.getY());
+                speaker.getY());
         }
         else
         {
-            thumb.setTopLeftPosition(
-                thumb.getX(),
+            speaker.setTopLeftPosition(
+                speaker.getX(),
                 static_cast<int>(jmap(slider->getValue(), slider->getMinimum(), slider->getMaximum(), bounds.getHeight() - w, 0.0)));
         }
         repaint();
     }
 
-    void XYPad::thumbPositionChanged(Point<double> position)
+    void XYPad::speakerPositionChanged(Point<double> position)
     {
-        const double thumbX = position.getX() - (getWidth() / 2.0) + thumbSize / 2;
-        const double thumbY = position.getY() - (getHeight() / 2.0) + thumbSize / 2;
-        // const double thumbX = position.getX() - (getWidth() / 2.0 + thumbSize);
-        // const double thumbY = position.getY() - (getHeight() / 2.0 + thumbSize);
+        const double speakerX = position.getX() - (getWidth() / 2.0) + speakerSize / 2;
+        const double speakerY = position.getY() - (getHeight() / 2.0) + speakerSize / 2;
 
         // Calculate angle in radians
-        double angle = std::atan2(thumbY, thumbX); // Angle in radians
+        double angle = std::atan2(speakerY, speakerX); // Angle in radians
 
         // Convert the angle to degrees
         angleDegrees = angle * (180.0 / juce::MathConstants<double>::pi); // Using M_PI for better precision
@@ -211,10 +202,9 @@ namespace juce::Gui
 
         // Calculate distance
         double radius = getWidth() / 2.0;
-        double distance = std::sqrt(thumbX * thumbX + thumbY * thumbY);
+        double distance = std::sqrt(speakerX * speakerX + speakerY * speakerY);
         distance = std::min(distance, radius); // Clamp the distance to the radius
-        distance = jmap(static_cast<float>(distance), (float)thumbSize, static_cast<float>(radius), 0.0f, -16.0f);
-        DBG(distance);
+        distance = jmap(static_cast<float>(distance), (float)speakerSize, static_cast<float>(radius), 0.0f, -16.0f);
 
         if (onDistanceChanged)
             onDistanceChanged(distance);

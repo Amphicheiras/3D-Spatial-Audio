@@ -2,7 +2,7 @@
 #include "3DAudioPlugin/PluginEditor.h"
 
 //==============================================================================
-AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudioProcessor &p)
+PluginEditor::PluginEditor(PluginProcessor &p)
     : AudioProcessorEditor(&p), processorRef(p)
 {
     // AZIMUTH SLIDER
@@ -67,21 +67,21 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
     // GAIN METER
     addAndMakeVisible(gainMeter);
 
-    setSize(380, 510);
+    setSize(440, 510);
     // setResizable(true, true);
 
     processorRef.apvts.addParameterListener("azimuth", this);
     processorRef.apvts.addParameterListener("elevation", this);
 }
 
-AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor()
+PluginEditor::~PluginEditor()
 {
     processorRef.apvts.removeParameterListener("azimuth", this);
     processorRef.apvts.removeParameterListener("elevation", this);
 }
 
 //==============================================================================
-void AudioPluginAudioProcessorEditor::paint(juce::Graphics &g)
+void PluginEditor::paint(juce::Graphics &g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
@@ -89,7 +89,7 @@ void AudioPluginAudioProcessorEditor::paint(juce::Graphics &g)
     g.fillAll(juce::Colours::blueviolet);
 }
 
-void AudioPluginAudioProcessorEditor::resized()
+void PluginEditor::resized()
 {
     // Get the local bounds and reduce them for padding
     auto container = getLocalBounds().reduced(20); // Remove 20 pixels from each side for padding
@@ -99,20 +99,21 @@ void AudioPluginAudioProcessorEditor::resized()
     const int padding = 10;     // Space between the knobs and the XY pad
 
     // Calculate the width for each knob
-    auto knobWidth = container.getWidth() / 3; // Divide the width into three equal parts
+    auto knobWidth = (container.getWidth() - 60) / 3; // Divide the width into three equal parts
 
     // Set bounds for each slider (knob) in the specified order
-    azimuthSlider.setBounds(container.removeFromLeft(knobWidth).withHeight(knobHeight).reduced(padding));   // Center knob (Azimuth)
-    distanceSlider.setBounds(container.removeFromLeft(knobWidth).withHeight(knobHeight).reduced(padding));  // Right knob (Distance)
-    elevationSlider.setBounds(container.removeFromLeft(knobWidth).withHeight(knobHeight).reduced(padding)); // Left knob (Elevation)
+    azimuthSlider.setBounds(container.removeFromLeft(knobWidth).withHeight(knobHeight).reduced(padding));
+    distanceSlider.setBounds(container.removeFromLeft(knobWidth).withHeight(knobHeight).reduced(padding));
+    elevationSlider.setBounds(container.removeFromLeft(knobWidth).withHeight(knobHeight).reduced(padding));
 
     // Set the bounds for the XY pad below the knobs
     // Position the XY pad directly below the knobs, taking into account the height and padding
-    xyPad.setBounds(0, knobHeight + padding + 20, getWidth(), getWidth()); // Set XY pad below the knobs with extra space
-    gainMeter.setBounds(getWidth() - 80, 20, 60, getHeight() - 40); // Adjust as needed
+    xyPad.setBounds(0, knobHeight + padding + 20, getWidth() - 60, getWidth() - 60);
+    auto meterWidth = 60;
+    gainMeter.setBounds(380, 0, meterWidth, getHeight());
 }
 
-void AudioPluginAudioProcessorEditor::parameterChanged(const juce::String &parameterID, float newValue)
+void PluginEditor::parameterChanged(const juce::String &parameterID, float newValue)
 {
     if (parameterID == "elevation")
         elevationSlider.setValue(newValue);
@@ -120,7 +121,7 @@ void AudioPluginAudioProcessorEditor::parameterChanged(const juce::String &param
         azimuthSlider.setValue(newValue);
 }
 
-void AudioPluginAudioProcessorEditor::sliderValueChanged(juce::Slider *slider)
+void PluginEditor::sliderValueChanged(juce::Slider *slider)
 {
     if (slider == &distanceSlider)
     {
@@ -128,7 +129,7 @@ void AudioPluginAudioProcessorEditor::sliderValueChanged(juce::Slider *slider)
     }
 }
 
-void AudioPluginAudioProcessorEditor::mouseDoubleClick(const juce::MouseEvent &event)
+void PluginEditor::mouseDoubleClick(const juce::MouseEvent &event)
 {
     if (event.eventComponent == &distanceSlider)
     {
