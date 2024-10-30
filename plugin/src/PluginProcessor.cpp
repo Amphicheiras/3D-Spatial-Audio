@@ -156,7 +156,7 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     buffer.applyGain(juce::Decibels::decibelsToGain(distanceValue));
 
     // ! A T T E N T I O N !
-    buffer.applyGain(6.0f);
+    buffer.applyGain(3.0f);
     // ! / ! / ! / ! / ! / !
 
     const auto numSamples = buffer.getNumSamples();
@@ -177,9 +177,6 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float> &buffer,
         else
             rmsLevelRight.setCurrentAndTargetValue(value);
     }
-
-    DBG("test1" + (juce::String)rmsLevelLeft.getCurrentValue());
-    DBG("test2" + (juce::String)rmsLevelRight.getCurrentValue());
 }
 
 //==============================================================================

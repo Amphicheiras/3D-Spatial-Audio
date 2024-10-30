@@ -7,7 +7,7 @@ PluginEditor::PluginEditor(PluginProcessor &p)
 {
     // AZIMUTH SLIDER
     azimuthSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
-    azimuthSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, true, 100, 20);
+    azimuthSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, true, 60, 20);
     azimuthSlider.setRange(-180.0f, 180.0f, 5.0f);
     azimuthSlider.setValue(*audioProcessor.apvts.getRawParameterValue("azimuth"));
     azimuthSlider.addMouseListener(this, false);
@@ -23,7 +23,7 @@ PluginEditor::PluginEditor(PluginProcessor &p)
 
     // ELEVATION SLIDER
     elevationSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
-    elevationSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, true, 100, 20);
+    elevationSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, true, 60, 20);
     elevationSlider.setRange(-20.0f, 20.0f, 10.0f);
     elevationSlider.setValue(*audioProcessor.apvts.getRawParameterValue("elevation"));
     elevationSlider.addMouseListener(this, false);
@@ -39,7 +39,7 @@ PluginEditor::PluginEditor(PluginProcessor &p)
 
     // DISTANCE SLIDER
     distanceSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
-    distanceSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, true, 100, 20);
+    distanceSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, true, 60, 20);
     distanceSlider.setRange(-13.0, 0.0, 0.1);
     distanceSlider.setValue(-13.0);
     distanceSlider.addListener(this);
@@ -104,9 +104,9 @@ void PluginEditor::resized()
     auto knobWidth = (container.getWidth() - 60) / 3; // Divide the width into three equal parts
 
     // Set bounds for each slider (knob) in the specified order
-    azimuthSlider.setBounds(container.removeFromLeft(knobWidth).withHeight(knobHeight).reduced(padding));
-    distanceSlider.setBounds(container.removeFromLeft(knobWidth).withHeight(knobHeight).reduced(padding));
+    azimuthSlider.setBounds(container.removeFromLeft(knobWidth).withHeight(knobHeight + 20).reduced(padding));
     elevationSlider.setBounds(container.removeFromLeft(knobWidth).withHeight(knobHeight).reduced(padding));
+    distanceSlider.setBounds(container.removeFromLeft(knobWidth).withHeight(knobHeight + 20).reduced(padding));
 
     // Set the bounds for the XY pad below the knobs
     // Position the XY pad directly below the knobs, taking into account the height and padding
