@@ -1,7 +1,7 @@
 build/
 libs/
-README.md
-TODO.md
+# README.md
+# TODO.md
 # plugin/resources
 .vscode
 cmake.check_cache

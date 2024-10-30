@@ -1,0 +1,3 @@
+- Install libmysofa
+- Gui textures
+- OpenGL?

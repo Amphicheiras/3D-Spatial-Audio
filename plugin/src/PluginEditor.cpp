@@ -40,8 +40,8 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
     // DISTANCE SLIDER
     distanceSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
     distanceSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, true, 100, 20);
-    distanceSlider.setRange(-60.0, 0.0, 0.1);
-    distanceSlider.setValue(-60.0);
+    distanceSlider.setRange(-13.0, 0.0, 0.1);
+    distanceSlider.setValue(-13.0);
     distanceSlider.addListener(this);
     distanceSlider.addMouseListener(this, false);
     addAndMakeVisible(distanceSlider);
@@ -51,11 +51,20 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
     addAndMakeVisible(distanceLabel);
 
     // XY PAD
-    xyPad.registerSlider(&elevationSlider, juce::Gui::XYPad::Axis::Y);
+    // xyPad.registerSlider(&elevationSlider, juce::Gui::XYPad::Axis::Y);
     xyPad.registerSlider(&azimuthSlider, juce::Gui::XYPad::Axis::X);
+    xyPad.onDistanceChanged = [this](double distance)
+    {
+        distanceSlider.setValue(distance, juce::sendNotification);
+    };
+    xyPad.onAngleChanged = [this](double angleDegrees)
+    {
+        azimuthSlider.setValue(angleDegrees, juce::sendNotification);
+        processorRef.apvts.getParameter("azimuth")->setValueNotifyingHost((float)(angleDegrees + 180.0f) / 360.0f);
+    };
     addAndMakeVisible(xyPad);
 
-    setSize(400, 400);
+    setSize(380, 510);
     // setResizable(true, true);
 
     processorRef.apvts.addParameterListener("azimuth", this);
@@ -88,13 +97,13 @@ void AudioPluginAudioProcessorEditor::resized()
     auto knobWidth = container.getWidth() / 3; // Divide the width into three equal parts
 
     // Set bounds for each slider (knob) in the specified order
-    elevationSlider.setBounds(container.removeFromLeft(knobWidth).withHeight(knobHeight).reduced(padding)); // Left knob (Elevation)
     azimuthSlider.setBounds(container.removeFromLeft(knobWidth).withHeight(knobHeight).reduced(padding));   // Center knob (Azimuth)
     distanceSlider.setBounds(container.removeFromLeft(knobWidth).withHeight(knobHeight).reduced(padding));  // Right knob (Distance)
+    elevationSlider.setBounds(container.removeFromLeft(knobWidth).withHeight(knobHeight).reduced(padding)); // Left knob (Elevation)
 
     // Set the bounds for the XY pad below the knobs
     // Position the XY pad directly below the knobs, taking into account the height and padding
-    xyPad.setBounds(0, knobHeight + padding + 20, getWidth(), getHeight() - (knobHeight + padding + 20)); // Set XY pad below the knobs with extra space
+    xyPad.setBounds(0, knobHeight + padding + 20, getWidth(), getWidth()); // Set XY pad below the knobs with extra space
 }
 
 void AudioPluginAudioProcessorEditor::parameterChanged(const juce::String &parameterID, float newValue)

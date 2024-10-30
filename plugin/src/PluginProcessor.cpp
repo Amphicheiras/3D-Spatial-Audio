@@ -92,6 +92,7 @@ void AudioPluginAudioProcessor::prepareToPlay(double sampleRate, int samplesPerB
     spec.sampleRate = sampleRate;
     spec.maximumBlockSize = samplesPerBlock;
     convolutionProcessor.prepare(spec);
+    loadImpulseResponseFromSliders(0, 0);
 }
 
 void AudioPluginAudioProcessor::releaseResources()
@@ -137,6 +138,7 @@ void AudioPluginAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
 
     // H  R  T  F
     float azimuth = *apvts.getRawParameterValue("azimuth");
+    azimuth = std::round(azimuth / 5.0f) * 5.0f;
     float elevation = *apvts.getRawParameterValue("elevation");
     if (currentAzimuth != azimuth || currentElevation != elevation)
     {
@@ -148,7 +150,7 @@ void AudioPluginAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     buffer.applyGain(juce::Decibels::decibelsToGain(distanceValue));
 
     // ! A T T E N T I O N !
-    buffer.applyGain(15.0f);
+    buffer.applyGain(6.0f);
     // ! / ! / ! / ! / ! / !
 }
 
