@@ -54,13 +54,21 @@ namespace juce::Gui
         double dy = newPosition.getY() - centerY;
         double distance = std::sqrt(dx * dx + dy * dy);
 
-        // Check if the distance is greater than the allowed radius
+        // Check if the distance is greater than the allowed outter radius
         double radius = (parentXYPad->getWidth() / 2.0) - (thumbSize / 2.0); // Adjust for thumb size
         if (distance > radius)
         {
             // Calculate the new position on the circle
             double angle = std::atan2(dy, dx);
             newPosition.setXY(centerX + std::cos(angle) * radius, centerY + std::sin(angle) * radius);
+        }
+        // Check if the distance is lesser than the allowed inner radius
+        double radiusInner = thumbSize; // Adjust for thumb size
+        if (distance < radiusInner)
+        {
+            // Calculate the new position on the circle
+            double angle = std::atan2(dy, dx);
+            newPosition.setXY(centerX + std::cos(angle) * radiusInner, centerY + std::sin(angle) * radiusInner);
         }
 
         // Set the thumb position
@@ -205,7 +213,8 @@ namespace juce::Gui
         double radius = getWidth() / 2.0;
         double distance = std::sqrt(thumbX * thumbX + thumbY * thumbY);
         distance = std::min(distance, radius); // Clamp the distance to the radius
-        distance = jmap(static_cast<float>(distance), 0.0f, static_cast<float>(radius), 0.0f, -16.0f);
+        distance = jmap(static_cast<float>(distance), (float)thumbSize, static_cast<float>(radius), 0.0f, -16.0f);
+        DBG(distance);
 
         if (onDistanceChanged)
             onDistanceChanged(distance);
