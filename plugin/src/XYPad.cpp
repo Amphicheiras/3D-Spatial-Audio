@@ -7,7 +7,7 @@ namespace juce::Gui
      */
     XYPad::Thumb::Thumb()
     {
-        speakerImage = ImageFileFormat::loadFrom(File(juce::File::getCurrentWorkingDirectory().getParentDirectory().getParentDirectory().getParentDirectory().getParentDirectory().getParentDirectory().getFullPathName() + "/plugin/resources/images/speakerIcon.png"));
+        speakerImage = ImageFileFormat::loadFrom(File(juce::File::getCurrentWorkingDirectory().getParentDirectory().getParentDirectory().getParentDirectory().getParentDirectory().getParentDirectory().getFullPathName() + "/plugin/resources/images/speakerIcon2.png"));
         constrainer.setMinimumOnscreenAmounts(thumbSize, thumbSize, thumbSize, thumbSize);
     }
 
@@ -73,13 +73,6 @@ namespace juce::Gui
         {
             parentXYPad->thumbPositionChanged(getPosition().toDouble());
         }
-
-        auto newPositionThumb = getPosition().toDouble();
-        DBG("Thumb Position: " << newPositionThumb.toString());
-
-        // Get current mouse position
-        auto mousePosition = event.getPosition().toDouble();
-        DBG("Mouse Position: " << mousePosition.toString());
     }
 
     /*
@@ -109,7 +102,7 @@ namespace juce::Gui
 
     void XYPad::resized()
     {
-        thumb.setBounds(getLocalBounds().withSizeKeepingCentre(thumbSize, thumbSize));
+        thumb.setBounds(getLocalBounds().withSizeKeepingCentre(thumbSize, thumbSize).withY(getHeight() / 2 - getHeight() / 2));
         if (!xSliders.empty())
             sliderValueChanged(xSliders[0]);
         if (!ySliders.empty())
@@ -212,12 +205,10 @@ namespace juce::Gui
         double radius = getWidth() / 2.0;
         double distance = std::sqrt(thumbX * thumbX + thumbY * thumbY);
         distance = std::min(distance, radius); // Clamp the distance to the radius
-        distance = jmap(static_cast<float>(distance), 0.0f, static_cast<float>(radius), 0.0f, -60.0f);
+        distance = jmap(static_cast<float>(distance), 0.0f, static_cast<float>(radius), 0.0f, -16.0f);
 
         if (onDistanceChanged)
             onDistanceChanged(distance);
-
-        DBG(" Distance! " + (juce::String)distance);
 
         repaint();
     }

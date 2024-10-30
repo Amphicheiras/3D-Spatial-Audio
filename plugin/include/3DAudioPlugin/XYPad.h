@@ -41,6 +41,7 @@ namespace juce::Gui
         std::function<void(double)> onAngleChanged;
 
         double angleDegrees = 0.0;
+        static constexpr int thumbSize = 64;
 
     private:
         void sliderValueChanged(Slider *slider) override;
@@ -49,7 +50,6 @@ namespace juce::Gui
         Thumb thumb;
         std::mutex vectorMutex;
 
-        static constexpr int thumbSize = 128;
         juce::Image headImage;
         void thumbPositionChanged(Point<double> position);
 
