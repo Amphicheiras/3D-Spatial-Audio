@@ -3,17 +3,17 @@
 
 //==============================================================================
 PluginEditor::PluginEditor(PluginProcessor &p)
-    : AudioProcessorEditor(&p), processorRef(p)
+    : AudioProcessorEditor(&p), audioProcessor(p)
 {
     // AZIMUTH SLIDER
     azimuthSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
     azimuthSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, true, 100, 20);
     azimuthSlider.setRange(-180.0f, 180.0f, 5.0f);
-    azimuthSlider.setValue(*processorRef.apvts.getRawParameterValue("azimuth"));
+    azimuthSlider.setValue(*audioProcessor.apvts.getRawParameterValue("azimuth"));
     azimuthSlider.addMouseListener(this, false);
     azimuthSlider.onValueChange = [this]
     {
-        processorRef.apvts.getParameter("azimuth")->setValueNotifyingHost((float)(azimuthSlider.getValue() + 180.0f) / 360.0f);
+        audioProcessor.apvts.getParameter("azimuth")->setValueNotifyingHost((float)(azimuthSlider.getValue() + 180.0f) / 360.0f);
     };
     addAndMakeVisible(azimuthSlider);
     // AZIMUTH LABEL
@@ -25,11 +25,11 @@ PluginEditor::PluginEditor(PluginProcessor &p)
     elevationSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
     elevationSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, true, 100, 20);
     elevationSlider.setRange(-20.0f, 20.0f, 10.0f);
-    elevationSlider.setValue(*processorRef.apvts.getRawParameterValue("elevation"));
+    elevationSlider.setValue(*audioProcessor.apvts.getRawParameterValue("elevation"));
     elevationSlider.addMouseListener(this, false);
     elevationSlider.onValueChange = [this]
     {
-        processorRef.apvts.getParameter("elevation")->setValueNotifyingHost((float)(elevationSlider.getValue() + 20.0f) / 40.0f);
+        audioProcessor.apvts.getParameter("elevation")->setValueNotifyingHost((float)(elevationSlider.getValue() + 20.0f) / 40.0f);
     };
     addAndMakeVisible(elevationSlider);
     // ELEVATION LABEL
@@ -60,7 +60,7 @@ PluginEditor::PluginEditor(PluginProcessor &p)
     xyPad.onAngleChanged = [this](double angleDegrees)
     {
         azimuthSlider.setValue(angleDegrees, juce::sendNotification);
-        processorRef.apvts.getParameter("azimuth")->setValueNotifyingHost((float)(angleDegrees + 180.0f) / 360.0f);
+        audioProcessor.apvts.getParameter("azimuth")->setValueNotifyingHost((float)(angleDegrees + 180.0f) / 360.0f);
     };
     addAndMakeVisible(xyPad);
 
@@ -70,14 +70,16 @@ PluginEditor::PluginEditor(PluginProcessor &p)
     setSize(440, 510);
     // setResizable(true, true);
 
-    processorRef.apvts.addParameterListener("azimuth", this);
-    processorRef.apvts.addParameterListener("elevation", this);
+    startTimer(24);
+
+    audioProcessor.apvts.addParameterListener("azimuth", this);
+    audioProcessor.apvts.addParameterListener("elevation", this);
 }
 
 PluginEditor::~PluginEditor()
 {
-    processorRef.apvts.removeParameterListener("azimuth", this);
-    processorRef.apvts.removeParameterListener("elevation", this);
+    audioProcessor.apvts.removeParameterListener("azimuth", this);
+    audioProcessor.apvts.removeParameterListener("elevation", this);
 }
 
 //==============================================================================
@@ -113,6 +115,13 @@ void PluginEditor::resized()
     gainMeter.setBounds(380, 0, meterWidth, getHeight());
 }
 
+void PluginEditor::timerCallback()
+{
+    gainMeter.leftLevel = audioProcessor.getRMSValue(0);
+    gainMeter.rightLevel = audioProcessor.getRMSValue(1);
+    gainMeter.repaint();
+}
+
 void PluginEditor::parameterChanged(const juce::String &parameterID, float newValue)
 {
     if (parameterID == "elevation")
@@ -125,7 +134,7 @@ void PluginEditor::sliderValueChanged(juce::Slider *slider)
 {
     if (slider == &distanceSlider)
     {
-        processorRef.distanceValue = (float)distanceSlider.getValue();
+        audioProcessor.distanceValue = (float)distanceSlider.getValue();
     }
 }
 

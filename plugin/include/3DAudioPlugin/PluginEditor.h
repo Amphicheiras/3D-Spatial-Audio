@@ -8,7 +8,8 @@
 //==============================================================================
 class PluginEditor final : public juce::AudioProcessorEditor,
                            public juce::AudioProcessorValueTreeState::Listener,
-                           public juce::Slider::Listener
+                           public juce::Slider::Listener,
+                           public juce::Timer
 {
 public:
     explicit PluginEditor(PluginProcessor &);
@@ -17,6 +18,7 @@ public:
     //==============================================================================
     void paint(juce::Graphics &) override;
     void resized() override;
+    void timerCallback() override;
 
     // Listener method
     void parameterChanged(const juce::String &parameterID, float newValue) override;
@@ -24,7 +26,7 @@ public:
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
-    PluginProcessor &processorRef;
+    PluginProcessor &audioProcessor;
 
     void sliderValueChanged(juce::Slider *slider) override;
     void mouseDoubleClick(const juce::MouseEvent &event) override;

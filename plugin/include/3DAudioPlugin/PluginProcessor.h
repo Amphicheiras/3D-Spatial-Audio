@@ -43,6 +43,10 @@ public:
     void getStateInformation(juce::MemoryBlock &destData) override;
     void setStateInformation(const void *data, int sizeInBytes) override;
 
+    // ? *************************************************************  ? //
+
+    float getRMSValue(const int channel) const;
+
     void loadImpulseResponseFromSliders(float azimuth, float elevation);
 
     juce::AudioProcessorValueTreeState apvts;
@@ -53,6 +57,8 @@ public:
     juce::dsp::Convolution convolutionProcessor;
 
 private:
+    juce::LinearSmoothedValue<float> rmsLevelLeft, rmsLevelRight;
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginProcessor)
 };

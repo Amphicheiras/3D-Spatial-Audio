@@ -93,6 +93,12 @@ void PluginProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
     spec.maximumBlockSize = samplesPerBlock;
     convolutionProcessor.prepare(spec);
     loadImpulseResponseFromSliders(0, 0);
+
+    rmsLevelLeft.reset(sampleRate, 0.5);
+    rmsLevelRight.reset(sampleRate, 0.5);
+
+    rmsLevelLeft.setCurrentAndTargetValue(-60.0f);
+    rmsLevelRight.setCurrentAndTargetValue(-60.0f);
 }
 
 void PluginProcessor::releaseResources()
@@ -152,6 +158,28 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     // ! A T T E N T I O N !
     buffer.applyGain(6.0f);
     // ! / ! / ! / ! / ! / !
+
+    const auto numSamples = buffer.getNumSamples();
+    rmsLevelLeft.skip(numSamples);
+    rmsLevelRight.skip(numSamples);
+    {
+        const auto value = juce::Decibels::gainToDecibels(buffer.getRMSLevel(0, 0, numSamples));
+        if (value < rmsLevelLeft.getCurrentValue())
+            rmsLevelLeft.setTargetValue(value);
+        else
+            rmsLevelLeft.setCurrentAndTargetValue(value);
+    }
+
+    {
+        const auto value = juce::Decibels::gainToDecibels(buffer.getRMSLevel(1, 0, numSamples));
+        if (value < rmsLevelRight.getCurrentValue())
+            rmsLevelRight.setTargetValue(value);
+        else
+            rmsLevelRight.setCurrentAndTargetValue(value);
+    }
+
+    DBG("test1" + (juce::String)rmsLevelLeft.getCurrentValue());
+    DBG("test2" + (juce::String)rmsLevelRight.getCurrentValue());
 }
 
 //==============================================================================
@@ -187,6 +215,21 @@ juce::AudioProcessor *JUCE_CALLTYPE createPluginFilter()
 {
     return new PluginProcessor();
 }
+
+float PluginProcessor::getRMSValue(const int channel) const
+{
+    jassert(channel == 0 || channel == 1);
+    if (channel == 0)
+    {
+        return rmsLevelLeft.getCurrentValue();
+    }
+    if (channel == 1)
+    {
+        return rmsLevelRight.getCurrentValue();
+    }
+    return -1;
+}
+
 void PluginProcessor::loadImpulseResponseFromSliders(float azimuth, float elevation)
 {
     currentAzimuth = azimuth;
