@@ -23,10 +23,12 @@ target_sources(${PROJECT_NAME}
         src/PluginProcessor.cpp
         src/XYPad.cpp
         src/HRTFProcessor.cpp
+        src/GainMeter.cpp
         ${INCLUDE_DIR}/PluginEditor.h
         ${INCLUDE_DIR}/PluginProcessor.h
         ${INCLUDE_DIR}/XYPad.h
         ${INCLUDE_DIR}/HRTFProcessor.h
+        ${INCLUDE_DIR}/GainMeter.h
 )
 
 target_include_directories(${PROJECT_NAME}

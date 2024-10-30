@@ -64,6 +64,9 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
     };
     addAndMakeVisible(xyPad);
 
+    // GAIN METER
+    addAndMakeVisible(gainMeter);
+
     setSize(380, 510);
     // setResizable(true, true);
 
@@ -106,6 +109,7 @@ void AudioPluginAudioProcessorEditor::resized()
     // Set the bounds for the XY pad below the knobs
     // Position the XY pad directly below the knobs, taking into account the height and padding
     xyPad.setBounds(0, knobHeight + padding + 20, getWidth(), getWidth()); // Set XY pad below the knobs with extra space
+    gainMeter.setBounds(getWidth() - 80, 20, 60, getHeight() - 40); // Adjust as needed
 }
 
 void AudioPluginAudioProcessorEditor::parameterChanged(const juce::String &parameterID, float newValue)
