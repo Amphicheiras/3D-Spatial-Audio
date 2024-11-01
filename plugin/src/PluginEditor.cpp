@@ -2,18 +2,18 @@
 #include "3DAudioPlugin/PluginEditor.h"
 
 //==============================================================================
-AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudioProcessor &p)
-    : AudioProcessorEditor(&p), processorRef(p)
+PluginEditor::PluginEditor(PluginProcessor &p)
+    : AudioProcessorEditor(&p), audioProcessor(p)
 {
     // AZIMUTH SLIDER
     azimuthSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
-    azimuthSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, true, 100, 20);
+    azimuthSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, true, 60, 20);
     azimuthSlider.setRange(-180.0f, 180.0f, 5.0f);
-    azimuthSlider.setValue(*processorRef.apvts.getRawParameterValue("azimuth"));
+    azimuthSlider.setValue(*audioProcessor.apvts.getRawParameterValue("azimuth"));
     azimuthSlider.addMouseListener(this, false);
     azimuthSlider.onValueChange = [this]
     {
-        processorRef.apvts.getParameter("azimuth")->setValueNotifyingHost((float)(azimuthSlider.getValue() + 180.0f) / 360.0f);
+        audioProcessor.apvts.getParameter("azimuth")->setValueNotifyingHost((float)(azimuthSlider.getValue() + 180.0f) / 360.0f);
     };
     addAndMakeVisible(azimuthSlider);
     // AZIMUTH LABEL
@@ -23,13 +23,13 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 
     // ELEVATION SLIDER
     elevationSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
-    elevationSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, true, 100, 20);
+    elevationSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, true, 60, 20);
     elevationSlider.setRange(-20.0f, 20.0f, 10.0f);
-    elevationSlider.setValue(*processorRef.apvts.getRawParameterValue("elevation"));
+    elevationSlider.setValue(*audioProcessor.apvts.getRawParameterValue("elevation"));
     elevationSlider.addMouseListener(this, false);
     elevationSlider.onValueChange = [this]
     {
-        processorRef.apvts.getParameter("elevation")->setValueNotifyingHost((float)(elevationSlider.getValue() + 20.0f) / 40.0f);
+        audioProcessor.apvts.getParameter("elevation")->setValueNotifyingHost((float)(elevationSlider.getValue() + 20.0f) / 40.0f);
     };
     addAndMakeVisible(elevationSlider);
     // ELEVATION LABEL
@@ -39,7 +39,7 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 
     // DISTANCE SLIDER
     distanceSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
-    distanceSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, true, 100, 20);
+    distanceSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, true, 60, 20);
     distanceSlider.setRange(-13.0, 0.0, 0.1);
     distanceSlider.setValue(-13.0);
     distanceSlider.addListener(this);
@@ -51,8 +51,8 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
     addAndMakeVisible(distanceLabel);
 
     // XY PAD
-    // xyPad.registerSlider(&elevationSlider, juce::Gui::XYPad::Axis::Y);
     xyPad.registerSlider(&azimuthSlider, juce::Gui::XYPad::Axis::X);
+    xyPad.registerSlider(&distanceSlider, juce::Gui::XYPad::Axis::Y);
     xyPad.onDistanceChanged = [this](double distance)
     {
         distanceSlider.setValue(distance, juce::sendNotification);
@@ -60,25 +60,30 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
     xyPad.onAngleChanged = [this](double angleDegrees)
     {
         azimuthSlider.setValue(angleDegrees, juce::sendNotification);
-        processorRef.apvts.getParameter("azimuth")->setValueNotifyingHost((float)(angleDegrees + 180.0f) / 360.0f);
+        audioProcessor.apvts.getParameter("azimuth")->setValueNotifyingHost((float)(angleDegrees + 180.0f) / 360.0f);
     };
     addAndMakeVisible(xyPad);
 
-    setSize(380, 510);
+    // GAIN METER
+    addAndMakeVisible(levelMeter);
+
+    setSize(440, 510);
     // setResizable(true, true);
 
-    processorRef.apvts.addParameterListener("azimuth", this);
-    processorRef.apvts.addParameterListener("elevation", this);
+    startTimer(24);
+
+    audioProcessor.apvts.addParameterListener("azimuth", this);
+    audioProcessor.apvts.addParameterListener("elevation", this);
 }
 
-AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor()
+PluginEditor::~PluginEditor()
 {
-    processorRef.apvts.removeParameterListener("azimuth", this);
-    processorRef.apvts.removeParameterListener("elevation", this);
+    audioProcessor.apvts.removeParameterListener("azimuth", this);
+    audioProcessor.apvts.removeParameterListener("elevation", this);
 }
 
 //==============================================================================
-void AudioPluginAudioProcessorEditor::paint(juce::Graphics &g)
+void PluginEditor::paint(juce::Graphics &g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
@@ -86,7 +91,7 @@ void AudioPluginAudioProcessorEditor::paint(juce::Graphics &g)
     g.fillAll(juce::Colours::blueviolet);
 }
 
-void AudioPluginAudioProcessorEditor::resized()
+void PluginEditor::resized()
 {
     // Get the local bounds and reduce them for padding
     auto container = getLocalBounds().reduced(20); // Remove 20 pixels from each side for padding
@@ -96,19 +101,29 @@ void AudioPluginAudioProcessorEditor::resized()
     const int padding = 10;     // Space between the knobs and the XY pad
 
     // Calculate the width for each knob
-    auto knobWidth = container.getWidth() / 3; // Divide the width into three equal parts
+    auto knobWidth = (container.getWidth() - 60) / 3; // Divide the width into three equal parts
 
     // Set bounds for each slider (knob) in the specified order
-    azimuthSlider.setBounds(container.removeFromLeft(knobWidth).withHeight(knobHeight).reduced(padding));   // Center knob (Azimuth)
-    distanceSlider.setBounds(container.removeFromLeft(knobWidth).withHeight(knobHeight).reduced(padding));  // Right knob (Distance)
-    elevationSlider.setBounds(container.removeFromLeft(knobWidth).withHeight(knobHeight).reduced(padding)); // Left knob (Elevation)
+    azimuthSlider.setBounds(container.removeFromLeft(knobWidth).withHeight(knobHeight + 20).reduced(padding));
+    elevationSlider.setBounds(container.removeFromLeft(knobWidth).withHeight(knobHeight).reduced(padding));
+    distanceSlider.setBounds(container.removeFromLeft(knobWidth).withHeight(knobHeight + 20).reduced(padding));
 
     // Set the bounds for the XY pad below the knobs
     // Position the XY pad directly below the knobs, taking into account the height and padding
-    xyPad.setBounds(0, knobHeight + padding + 20, getWidth(), getWidth()); // Set XY pad below the knobs with extra space
+    xyPad.setBounds(0, knobHeight + padding + 20, getWidth() - 60, getWidth() - 60);
+    auto meterWidth = 60;
+    levelMeter.setBounds(380, 0, meterWidth, getHeight());
 }
 
-void AudioPluginAudioProcessorEditor::parameterChanged(const juce::String &parameterID, float newValue)
+void PluginEditor::timerCallback()
+{
+    DBG(levelMeter.leftLevel);
+    levelMeter.leftLevel = audioProcessor.getRMSValue(0);
+    levelMeter.rightLevel = audioProcessor.getRMSValue(1);
+    levelMeter.repaint();
+}
+
+void PluginEditor::parameterChanged(const juce::String &parameterID, float newValue)
 {
     if (parameterID == "elevation")
         elevationSlider.setValue(newValue);
@@ -116,15 +131,15 @@ void AudioPluginAudioProcessorEditor::parameterChanged(const juce::String &param
         azimuthSlider.setValue(newValue);
 }
 
-void AudioPluginAudioProcessorEditor::sliderValueChanged(juce::Slider *slider)
+void PluginEditor::sliderValueChanged(juce::Slider *slider)
 {
     if (slider == &distanceSlider)
     {
-        processorRef.distanceValue = (float)distanceSlider.getValue();
+        audioProcessor.distanceValue = (float)distanceSlider.getValue();
     }
 }
 
-void AudioPluginAudioProcessorEditor::mouseDoubleClick(const juce::MouseEvent &event)
+void PluginEditor::mouseDoubleClick(const juce::MouseEvent &event)
 {
     if (event.eventComponent == &distanceSlider)
     {
