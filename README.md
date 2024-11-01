@@ -72,11 +72,13 @@ If you encounter bugs or have feature requests, please report them in the Issues
 
 ### License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the GNU GPL-3.0 License - see the LICENSE file for details.
 
 ### Acknowledgments
 
 Special thanks to the open-source audio community and JUCE for their continuous support and resources.
+
+Super special thanks to Jan Wilczek!
 
 # Useful Links
 - [3D Audio Demo](https://www.youtube.com/watch?v=a4mpK_2koR4&t=425s)
@@ -86,3 +88,5 @@ Special thanks to the open-source audio community and JUCE for their continuous 
 - [Example Plugin](https://www.youtube.com/watch?time_continue=50&v=BuyEh67dDNs&embeds_referring_euri=https%3A%2F%2Fwww.google.com%2F&source_ve_path=MjM4NTE)
 
 - [KD-Trees](https://en.wikipedia.org/wiki/K-d_tree)
+
+- [JUCE with CMake](https://www.youtube.com/watch?v=Uq7Hwt18s3s)
