@@ -35,6 +35,8 @@ An audio plugin for creating immersive 3D spatial sound experiences using Head-R
    cmake --build build
    ```
 
+4. Move "plugin/resources" directory to Documents folder
+
 ### Usage
 
 1. Load the Plugin:

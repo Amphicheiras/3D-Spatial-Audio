@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.22)
 
 project(3DAudioPlugin VERSION 0.1.0)
 
@@ -7,7 +7,7 @@ set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include/3DAudioPlugin")
 # find_package(mysofa CONFIG REQUIRED)
 
 juce_add_plugin(${PROJECT_NAME}
-    COMPANY_NAME UF0
+    COMPANY_NAME _UF0
     IS_SYNTH FALSE
     NEEDS_MIDI_INPUT FALSE
     NEEDS_MIDI_OUTPUT FALSE
