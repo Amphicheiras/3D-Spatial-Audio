@@ -3,7 +3,7 @@
 #include "juce_gui_basics/juce_gui_basics.h"
 #include "PluginProcessor.h"
 #include "XYPad.h"
-#include "GainMeter.h"
+#include "LevelMeter.h"
 
 //==============================================================================
 class PluginEditor final : public juce::AudioProcessorEditor,
@@ -41,7 +41,7 @@ private:
     juce::Label distanceLabel{"distanceLabel", "DISTANCE"};
 
     juce::Gui::XYPad xyPad;
-    juce::Gui::GainMeter gainMeter;
+    juce::Gui::LevelMeter levelMeter;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginEditor)
 };

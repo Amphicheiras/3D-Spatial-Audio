@@ -25,7 +25,7 @@ namespace juce::Gui
                 getWidth() / 2.0f,
                 getHeight() / 2.0f);
 
-            // Draw the rotated image
+            // draw the rotated image
             g.drawImageTransformed(speakerImage, transform, false);
         }
     }

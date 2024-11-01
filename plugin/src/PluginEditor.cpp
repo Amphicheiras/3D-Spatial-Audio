@@ -52,8 +52,6 @@ PluginEditor::PluginEditor(PluginProcessor &p)
     addAndMakeVisible(distanceLabel);
 
     // XY PAD
-    xyPad.registerSlider(&azimuthSlider, juce::Gui::XYPad::Axis::X);
-    xyPad.registerSlider(&distanceSlider, juce::Gui::XYPad::Axis::Y);
     xyPad.onDistanceChanged = [this](double distance)
     {
         distanceSlider.setValue(distance, juce::sendNotification);
@@ -63,10 +61,12 @@ PluginEditor::PluginEditor(PluginProcessor &p)
         azimuthSlider.setValue(angleDegrees, juce::sendNotification);
         audioProcessor.apvts.getParameter("azimuth")->setValueNotifyingHost((float)(angleDegrees + 180.0f) / 360.0f);
     };
+    xyPad.registerSlider(&azimuthSlider, juce::Gui::XYPad::Axis::X);
+    xyPad.registerSlider(&distanceSlider, juce::Gui::XYPad::Axis::Y);
     addAndMakeVisible(xyPad);
 
     // GAIN METER
-    addAndMakeVisible(gainMeter);
+    addAndMakeVisible(levelMeter);
 
     setSize(440, 510);
     // setResizable(true, true);
@@ -113,14 +113,15 @@ void PluginEditor::resized()
     // Position the XY pad directly below the knobs, taking into account the height and padding
     xyPad.setBounds(0, knobHeight + padding + 20, getWidth() - 60, getWidth() - 60);
     auto meterWidth = 60;
-    gainMeter.setBounds(380, 0, meterWidth, getHeight());
+    levelMeter.setBounds(380, 0, meterWidth, getHeight());
 }
 
 void PluginEditor::timerCallback()
 {
-    gainMeter.leftLevel = audioProcessor.getRMSValue(0);
-    gainMeter.rightLevel = audioProcessor.getRMSValue(1);
-    gainMeter.repaint();
+    DBG(levelMeter.leftLevel);
+    levelMeter.leftLevel = audioProcessor.getRMSValue(0);
+    levelMeter.rightLevel = audioProcessor.getRMSValue(1);
+    levelMeter.repaint();
 }
 
 void PluginEditor::parameterChanged(const juce::String &parameterID, float newValue)

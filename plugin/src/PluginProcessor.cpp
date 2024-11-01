@@ -155,33 +155,30 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     // Distance factor (gain)
     buffer.applyGain(juce::Decibels::decibelsToGain(distanceValue));
 
-#if JucePlugin_Build_Standalone
     // ! A T T E N T I O N !
-    buffer.applyGain(3.0f);
+    buffer.applyGain(4.5f);
     // ! / ! / ! / ! / ! / !
-#elif JucePlugin_Build_VST3
-    // ! A T T E N T I O N !
-    buffer.applyGain(-100.0f);
-    // ! / ! / ! / ! / ! / !
-#endif
 
+    // level meters
     const auto numSamples = buffer.getNumSamples();
     rmsLevelLeft.skip(numSamples);
     rmsLevelRight.skip(numSamples);
+    // Left Channel Peak Level
     {
-        const auto value = juce::Decibels::gainToDecibels(buffer.getRMSLevel(0, 0, numSamples));
-        if (value < rmsLevelLeft.getCurrentValue())
-            rmsLevelLeft.setTargetValue(value);
+        const auto peakValue = juce::Decibels::gainToDecibels(buffer.getMagnitude(0, 0, numSamples));
+        if (peakValue < rmsLevelLeft.getCurrentValue())
+            rmsLevelLeft.setTargetValue(peakValue);
         else
-            rmsLevelLeft.setCurrentAndTargetValue(value);
+            rmsLevelLeft.setCurrentAndTargetValue(peakValue);
     }
 
+    // Right Channel Peak Level
     {
-        const auto value = juce::Decibels::gainToDecibels(buffer.getRMSLevel(1, 0, numSamples));
-        if (value < rmsLevelRight.getCurrentValue())
-            rmsLevelRight.setTargetValue(value);
+        const auto peakValue = juce::Decibels::gainToDecibels(buffer.getMagnitude(1, 0, numSamples));
+        if (peakValue < rmsLevelRight.getCurrentValue())
+            rmsLevelRight.setTargetValue(peakValue);
         else
-            rmsLevelRight.setCurrentAndTargetValue(value);
+            rmsLevelRight.setCurrentAndTargetValue(peakValue);
     }
 }
 
