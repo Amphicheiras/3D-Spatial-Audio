@@ -11,7 +11,7 @@ public:
     ~HRTFProcessor();
 
     // Load HRTF for given angles
-    const juce::File loadHRTFFile(float azimuth, float elevation, std::vector<juce::String> basePath);
+    const juce::File loadHRTFFile(float azimuth, float elevation);
 
 private:
     // Manager for reading audio files

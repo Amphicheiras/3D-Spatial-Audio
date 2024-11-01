@@ -56,19 +56,6 @@ public:
     HRTFProcessor hrtfProcessor;
     juce::dsp::Convolution convolutionProcessor;
 
-    std::vector<juce::String> resourcesPath = {juce::File::getCurrentWorkingDirectory()
-                                                       .getParentDirectory()
-                                                       .getParentDirectory()
-                                                       .getParentDirectory()
-                                                       .getParentDirectory()
-                                                       .getParentDirectory()
-                                                       .getFullPathName() +
-                                                   "/plugin/resources",
-
-                                               juce::File::getCurrentWorkingDirectory()
-                                                       .getFullPathName() +
-                                                   "/resources"};
-
 private:
     juce::LinearSmoothedValue<float>
         rmsLevelLeft,

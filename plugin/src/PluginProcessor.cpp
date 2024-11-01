@@ -234,7 +234,7 @@ void PluginProcessor::loadImpulseResponseFromSliders(float azimuth, float elevat
 {
     currentAzimuth = azimuth;
     currentElevation = elevation;
-    convolutionProcessor.loadImpulseResponse(hrtfProcessor.loadHRTFFile(currentAzimuth, currentElevation, resourcesPath),
+    convolutionProcessor.loadImpulseResponse(hrtfProcessor.loadHRTFFile(currentAzimuth, currentElevation),
                                              juce::dsp::Convolution::Stereo::yes,
                                              juce::dsp::Convolution::Trim::yes,
                                              0,

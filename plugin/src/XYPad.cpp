@@ -5,11 +5,9 @@ namespace juce::Gui
     /*
      * XY Pad Speaker section
      */
-    XYPad::Speaker::Speaker() {}
-
-    XYPad::Speaker::Speaker(std::vector<String> resourcesPath)
+    XYPad::Speaker::Speaker()
     {
-        speakerImage = loadSpeakerImage(resourcesPath);
+        speakerImage = loadSpeakerImage();
         constrainer.setMinimumOnscreenAmounts(speakerSize, speakerSize, speakerSize, speakerSize);
     }
 
@@ -78,18 +76,15 @@ namespace juce::Gui
         }
     }
 
-    Image XYPad::Speaker::loadSpeakerImage(std::vector<String> resourcesPath)
+    Image XYPad::Speaker::loadSpeakerImage()
     {
-        for (const auto &path : resourcesPath)
+        File speakerImageFile = File::getSpecialLocation(File::userDocumentsDirectory).getChildFile("resources/images/speakerIcon.png");
+        if (speakerImageFile.existsAsFile())
         {
-            File speakerImageFile = File(path + "/images/speakerIcon.png");
-            if (speakerImageFile.existsAsFile())
-            {
-                speakerImage = ImageFileFormat::loadFrom(speakerImageFile);
-                return speakerImage;
-            }
-            DBG("Speaker image not found: " + speakerImageFile.getFullPathName());
+            speakerImage = ImageFileFormat::loadFrom(speakerImageFile);
+            return speakerImage;
         }
+        DBG("Speaker image not found: " + speakerImageFile.getFullPathName());
         jassertfalse;
         return Image();
     }
@@ -97,11 +92,9 @@ namespace juce::Gui
     /*
      * XY Pad section
      */
-    XYPad::XYPad() {};
-
-    XYPad::XYPad(std::vector<String> resourcesPath) : speaker(resourcesPath)
+    XYPad::XYPad() : speaker()
     {
-        headImage = loadHeadImage(resourcesPath);
+        headImage = loadHeadImage();
 
         speaker.setXYPad(this);
 
@@ -233,18 +226,15 @@ namespace juce::Gui
         repaint();
     }
 
-    Image XYPad::loadHeadImage(std::vector<String> resourcesPath)
+    Image XYPad::loadHeadImage()
     {
-        for (const auto &path : resourcesPath)
+        File headImageFile = File::getSpecialLocation(File::userDocumentsDirectory).getChildFile("resources/images/headIcon.png");
+        if (headImageFile.existsAsFile())
         {
-            File headImageFile = File(path + "/images/headIcon.png");
-            if (headImageFile.existsAsFile())
-            {
-                headImage = ImageFileFormat::loadFrom(headImageFile);
-                return headImage;
-            }
-            DBG("Head image not found: " + headImageFile.getFullPathName());
+            headImage = ImageFileFormat::loadFrom(headImageFile);
+            return headImage;
         }
+        DBG("Head image not found: " + headImageFile.getFullPathName());
         jassertfalse;
         return Image();
     }
