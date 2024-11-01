@@ -3,7 +3,8 @@
 
 //==============================================================================
 PluginEditor::PluginEditor(PluginProcessor &p)
-    : AudioProcessorEditor(&p), audioProcessor(p)
+    : AudioProcessorEditor(&p), audioProcessor(p),
+      xyPad(audioProcessor.resourcesPath)
 {
     // AZIMUTH SLIDER
     azimuthSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
@@ -51,8 +52,8 @@ PluginEditor::PluginEditor(PluginProcessor &p)
     addAndMakeVisible(distanceLabel);
 
     // XY PAD
-    // xyPad.registerSlider(&elevationSlider, juce::Gui::XYPad::Axis::Y);
     xyPad.registerSlider(&azimuthSlider, juce::Gui::XYPad::Axis::X);
+    xyPad.registerSlider(&distanceSlider, juce::Gui::XYPad::Axis::Y);
     xyPad.onDistanceChanged = [this](double distance)
     {
         distanceSlider.setValue(distance, juce::sendNotification);

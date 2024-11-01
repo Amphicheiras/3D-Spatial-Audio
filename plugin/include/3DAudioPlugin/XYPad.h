@@ -17,6 +17,7 @@ namespace juce::Gui
         {
         public:
             Speaker();
+            Speaker(std::vector<String> resourcesPath);
             void setXYPad(XYPad *xyPad) { parentXYPad = xyPad; }
             void paint(Graphics &g) override;
             void mouseDown(const MouseEvent &event) override;
@@ -27,12 +28,15 @@ namespace juce::Gui
             XYPad *parentXYPad = nullptr;
             ComponentDragger dragger;
             ComponentBoundsConstrainer constrainer;
-            juce::Image speakerImage;
+            Image speakerImage;
+
+            Image loadSpeakerImage(std::vector<String> resourcesPath);
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Speaker)
         };
 
         XYPad();
+        XYPad(std::vector<String> resourcesPath);
         void resized() override;
         void paint(Graphics &g) override;
         void registerSlider(Slider *slider, Axis axis);
@@ -49,8 +53,9 @@ namespace juce::Gui
         std::vector<Slider *> xSliders, ySliders;
         Speaker speaker;
         std::mutex vectorMutex;
+        Image loadHeadImage(std::vector<String> resourcesPath);
 
-        juce::Image headImage;
+        Image headImage;
         void speakerPositionChanged(Point<double> position);
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(XYPad)

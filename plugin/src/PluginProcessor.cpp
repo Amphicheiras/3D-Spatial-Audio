@@ -155,9 +155,15 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     // Distance factor (gain)
     buffer.applyGain(juce::Decibels::decibelsToGain(distanceValue));
 
+#if JucePlugin_Build_Standalone
     // ! A T T E N T I O N !
     buffer.applyGain(3.0f);
     // ! / ! / ! / ! / ! / !
+#elif JucePlugin_Build_VST3
+    // ! A T T E N T I O N !
+    buffer.applyGain(-100.0f);
+    // ! / ! / ! / ! / ! / !
+#endif
 
     const auto numSamples = buffer.getNumSamples();
     rmsLevelLeft.skip(numSamples);
@@ -231,7 +237,7 @@ void PluginProcessor::loadImpulseResponseFromSliders(float azimuth, float elevat
 {
     currentAzimuth = azimuth;
     currentElevation = elevation;
-    convolutionProcessor.loadImpulseResponse(hrtfProcessor.loadHRTFFile(currentAzimuth, currentElevation),
+    convolutionProcessor.loadImpulseResponse(hrtfProcessor.loadHRTFFile(currentAzimuth, currentElevation, resourcesPath),
                                              juce::dsp::Convolution::Stereo::yes,
                                              juce::dsp::Convolution::Trim::yes,
                                              0,

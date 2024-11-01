@@ -5,9 +5,11 @@ namespace juce::Gui
     /*
      * XY Pad Speaker section
      */
-    XYPad::Speaker::Speaker()
+    XYPad::Speaker::Speaker() {}
+
+    XYPad::Speaker::Speaker(std::vector<String> resourcesPath)
     {
-        speakerImage = ImageFileFormat::loadFrom(File(juce::File::getCurrentWorkingDirectory().getParentDirectory().getParentDirectory().getParentDirectory().getParentDirectory().getParentDirectory().getFullPathName() + "/plugin/resources/images/speakerIcon.png"));
+        speakerImage = loadSpeakerImage(resourcesPath);
         constrainer.setMinimumOnscreenAmounts(speakerSize, speakerSize, speakerSize, speakerSize);
     }
 
@@ -16,7 +18,7 @@ namespace juce::Gui
         if (speakerImage.isValid())
         {
             // get angle from XYPad
-            float rotationAngle = static_cast<float>(parentXYPad->angleDegrees) * (juce::MathConstants<float>::pi / 180.0f);
+            float rotationAngle = static_cast<float>(parentXYPad->angleDegrees) * (MathConstants<float>::pi / 180.0f);
             // apply rotation transformation around the center of the speaker
             AffineTransform transform = AffineTransform::rotation(
                 rotationAngle,
@@ -76,12 +78,31 @@ namespace juce::Gui
         }
     }
 
+    Image XYPad::Speaker::loadSpeakerImage(std::vector<String> resourcesPath)
+    {
+        for (const auto &path : resourcesPath)
+        {
+            File speakerImageFile = File(path + "/images/speakerIcon.png");
+            if (speakerImageFile.existsAsFile())
+            {
+                speakerImage = ImageFileFormat::loadFrom(speakerImageFile);
+                return speakerImage;
+            }
+            DBG("Speaker image not found: " + speakerImageFile.getFullPathName());
+        }
+        jassertfalse;
+        return Image();
+    }
+
     /*
      * XY Pad section
      */
-    XYPad::XYPad()
+    XYPad::XYPad() {};
+
+    XYPad::XYPad(std::vector<String> resourcesPath) : speaker(resourcesPath)
     {
-        headImage = ImageFileFormat::loadFrom(File(juce::File::getCurrentWorkingDirectory().getParentDirectory().getParentDirectory().getParentDirectory().getParentDirectory().getParentDirectory().getFullPathName() + "/plugin/resources/images/headIcon.png"));
+        headImage = loadHeadImage(resourcesPath);
+
         speaker.setXYPad(this);
 
         addAndMakeVisible(speaker);
@@ -182,7 +203,7 @@ namespace juce::Gui
         double angle = std::atan2(speakerY, speakerX); // Angle in radians
 
         // Convert the angle to degrees
-        angleDegrees = angle * (180.0 / juce::MathConstants<double>::pi); // Using M_PI for better precision
+        angleDegrees = angle * (180.0 / MathConstants<double>::pi); // Using M_PI for better precision
 
         // Normalize angle to [-180, 180]
         if (angleDegrees < -180.0)
@@ -210,5 +231,21 @@ namespace juce::Gui
             onDistanceChanged(distance);
 
         repaint();
+    }
+
+    Image XYPad::loadHeadImage(std::vector<String> resourcesPath)
+    {
+        for (const auto &path : resourcesPath)
+        {
+            File headImageFile = File(path + "/images/headIcon.png");
+            if (headImageFile.existsAsFile())
+            {
+                headImage = ImageFileFormat::loadFrom(headImageFile);
+                return headImage;
+            }
+            DBG("Head image not found: " + headImageFile.getFullPathName());
+        }
+        jassertfalse;
+        return Image();
     }
 }

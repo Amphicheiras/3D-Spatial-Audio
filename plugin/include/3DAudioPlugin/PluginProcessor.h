@@ -56,8 +56,23 @@ public:
     HRTFProcessor hrtfProcessor;
     juce::dsp::Convolution convolutionProcessor;
 
+    std::vector<juce::String> resourcesPath = {juce::File::getCurrentWorkingDirectory()
+                                                       .getParentDirectory()
+                                                       .getParentDirectory()
+                                                       .getParentDirectory()
+                                                       .getParentDirectory()
+                                                       .getParentDirectory()
+                                                       .getFullPathName() +
+                                                   "/plugin/resources",
+
+                                               juce::File::getCurrentWorkingDirectory()
+                                                       .getFullPathName() +
+                                                   "/resources"};
+
 private:
-    juce::LinearSmoothedValue<float> rmsLevelLeft, rmsLevelRight;
+    juce::LinearSmoothedValue<float>
+        rmsLevelLeft,
+        rmsLevelRight;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginProcessor)
