@@ -28,9 +28,6 @@ private:
     // access the processor object that created it.
     PluginProcessor &audioProcessor;
 
-    void sliderValueChanged(juce::Slider *slider) override;
-    void mouseDoubleClick(const juce::MouseEvent &event) override;
-
     juce::Slider azimuthSlider;
     juce::Label azimuthLabel{"azimuthLabel", "AZIMUTH"};
 
@@ -42,6 +39,12 @@ private:
 
     juce::Gui::XYPad xyPad;
     juce::Gui::LevelMeter levelMeter;
+
+    void setupSliders();
+    void setupXYPad();
+
+    void sliderValueChanged(juce::Slider *slider) override;
+    void mouseDoubleClick(const juce::MouseEvent &event) override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginEditor)
 };
