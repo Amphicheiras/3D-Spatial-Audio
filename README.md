@@ -25,17 +25,19 @@ An audio plugin for creating immersive 3D spatial sound experiences using Head-R
      cd 3D-Spatial-Audio 
     ```
 
-2. Configure with CMake:
+2. Have a look at the /root and /plugin CMakeLists.txt
+
+3. Configure with CMake:
    ```sh
    cmake -S . -B build
    ```
 
-3. Compile with CMake:
+4. Compile with CMake:
    ```sh
    cmake --build build
    ```
    
-4. Place "UF0/3DSA/resources" in your OS's "Documents" folder
+5. Place "UF0/3DSA/resources" in your OS's "Documents" folder
 
 ### Usage
 
