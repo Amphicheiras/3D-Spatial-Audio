@@ -34,7 +34,7 @@ An audio plugin for creating immersive 3D spatial sound experiences using Head-R
    ```sh
    cmake --build build
    ```
-4. Place the resources directory in your OS's "Documents" folder
+4. Place the resources directory found in "/plugin", in your OS's "Documents" folder
 
 ### Usage
 
