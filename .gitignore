@@ -1,6 +1,6 @@
 build/
 libs/
-plugin/resources
+UF0/3DSA/resources/
 .vscode
 cmake.check_cache
 CmakeSystem.cmake
