@@ -145,9 +145,12 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     // H  R  T  F
     float azimuth = *apvts.getRawParameterValue("azimuth");
     azimuth = std::round(azimuth / 5.0f) * 5.0f;
+    // float distance = *apvts.getRawParameterValue("distance");
     float elevation = *apvts.getRawParameterValue("elevation");
     if (currentAzimuth != azimuth || currentElevation != elevation)
     {
+        currentAzimuth = azimuth;
+        currentElevation = elevation;
         loadImpulseResponseFromSliders(azimuth, elevation);
     }
     juce::dsp::AudioBlock<float> block(buffer);
@@ -232,9 +235,7 @@ float PluginProcessor::getRMSValue(const int channel) const
 
 void PluginProcessor::loadImpulseResponseFromSliders(float azimuth, float elevation)
 {
-    currentAzimuth = azimuth;
-    currentElevation = elevation;
-    convolutionProcessor.loadImpulseResponse(hrtfProcessor.loadHRTFFile(currentAzimuth, currentElevation),
+    convolutionProcessor.loadImpulseResponse(hrtfProcessor.loadHRTFFile(azimuth, elevation),
                                              juce::dsp::Convolution::Stereo::yes,
                                              juce::dsp::Convolution::Trim::yes,
                                              0,

@@ -78,7 +78,7 @@ namespace juce::Gui
 
     Image XYPad::Speaker::loadSpeakerImage()
     {
-        File speakerImageFile = File::getSpecialLocation(File::userDocumentsDirectory).getChildFile("resources/images/speakerIcon.png");
+        File speakerImageFile = File::getSpecialLocation(File::userDocumentsDirectory).getChildFile("UF0/3DSA/resources/images/speakerIcon.png");
         if (speakerImageFile.existsAsFile())
         {
             speakerImage = ImageFileFormat::loadFrom(speakerImageFile);
@@ -228,7 +228,7 @@ namespace juce::Gui
 
     Image XYPad::loadHeadImage()
     {
-        File headImageFile = File::getSpecialLocation(File::userDocumentsDirectory).getChildFile("resources/images/headIcon.png");
+        File headImageFile = File::getSpecialLocation(File::userDocumentsDirectory).getChildFile("UF0/3DSA/resources/images/headIcon.png");
         if (headImageFile.existsAsFile())
         {
             headImage = ImageFileFormat::loadFrom(headImageFile);

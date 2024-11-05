@@ -1,8 +1,6 @@
 build/
 libs/
-# README.md
-# TODO.md
-# plugin/resources
+plugin/resources
 .vscode
 cmake.check_cache
 CmakeSystem.cmake

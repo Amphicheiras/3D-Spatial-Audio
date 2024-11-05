@@ -5,6 +5,103 @@
 PluginEditor::PluginEditor(PluginProcessor &p)
     : AudioProcessorEditor(&p), audioProcessor(p)
 {
+    setupSliders();
+    setupXYPad();
+
+    // GAIN METER
+    addAndMakeVisible(levelMeter);
+
+    setSize(440, 510);
+    // setResizable(true, true);
+    startTimer(24);
+
+    audioProcessor.apvts.addParameterListener("azimuth", this);
+    audioProcessor.apvts.addParameterListener("elevation", this);
+    audioProcessor.apvts.addParameterListener("distance", this);
+}
+
+PluginEditor::~PluginEditor()
+{
+    audioProcessor.apvts.removeParameterListener("azimuth", this);
+    audioProcessor.apvts.removeParameterListener("elevation", this);
+    audioProcessor.apvts.removeParameterListener("distance", this);
+}
+
+//==============================================================================
+void PluginEditor::paint(juce::Graphics &g)
+{
+    // (Our component is opaque, so we must completely fill the background with a solid colour)
+    g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+    // Set the background color to a predefined color from juce::Colours
+    g.fillAll(juce::Colours::blueviolet);
+}
+
+void PluginEditor::resized()
+{
+    // Get the local bounds and reduce them for padding
+    auto container = getLocalBounds().reduced(20); // Remove 20 pixels from each side for padding
+
+    // Set the height for the knobs (set to a reasonable value)
+    const int knobHeight = 100; // Fixed height for the knobs
+    const int padding = 10;     // Space between the knobs and the XY pad
+
+    // Calculate the width for each knob
+    auto knobWidth = (container.getWidth() - 60) / 3; // Divide the width into three equal parts
+
+    // Set bounds for each slider (knob) in the specified order
+    azimuthSlider.setBounds(container.removeFromLeft(knobWidth).withHeight(knobHeight + 20).reduced(padding));
+    elevationSlider.setBounds(container.removeFromLeft(knobWidth).withHeight(knobHeight).reduced(padding));
+    distanceSlider.setBounds(container.removeFromLeft(knobWidth).withHeight(knobHeight + 20).reduced(padding));
+
+    // Set the bounds for the XY pad below the knobs
+    // Position the XY pad directly below the knobs, taking into account the height and padding
+    xyPad.setBounds(0, knobHeight + padding + 20, getWidth() - 60, getWidth() - 60);
+    auto meterWidth = 60;
+    levelMeter.setBounds(380, 0, meterWidth, getHeight());
+}
+
+void PluginEditor::timerCallback()
+{
+    // DBG(levelMeter.leftLevel);
+    levelMeter.leftLevel = audioProcessor.getRMSValue(0);
+    levelMeter.rightLevel = audioProcessor.getRMSValue(1);
+    levelMeter.repaint();
+}
+
+void PluginEditor::parameterChanged(const juce::String &parameterID, float newValue)
+{
+    if (parameterID == "elevation")
+        elevationSlider.setValue(newValue);
+    else if (parameterID == "azimuth")
+        azimuthSlider.setValue(newValue);
+}
+
+void PluginEditor::sliderValueChanged(juce::Slider *slider)
+{
+    if (slider == &distanceSlider)
+    {
+        audioProcessor.distanceValue = (float)distanceSlider.getValue();
+    }
+}
+
+void PluginEditor::mouseDoubleClick(const juce::MouseEvent &event)
+{
+    if (event.eventComponent == &distanceSlider)
+    {
+        distanceSlider.setValue(-60.0f, juce::sendNotification);
+    }
+    else if (event.eventComponent == &elevationSlider)
+    {
+        elevationSlider.setValue(0.0f, juce::sendNotification);
+    }
+    else if (event.eventComponent == &azimuthSlider)
+    {
+        azimuthSlider.setValue(0.0f, juce::sendNotification);
+    }
+}
+
+void PluginEditor::setupSliders()
+{
     // AZIMUTH SLIDER
     azimuthSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
     azimuthSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, true, 60, 20);
@@ -44,13 +141,19 @@ PluginEditor::PluginEditor(PluginProcessor &p)
     distanceSlider.setValue(-13.0);
     distanceSlider.addListener(this);
     distanceSlider.addMouseListener(this, false);
+    elevationSlider.onValueChange = [this]
+    {
+        audioProcessor.apvts.getParameter("elevation")->setValueNotifyingHost((float)(elevationSlider.getValue() + 20.0f) / 40.0f);
+    };
     addAndMakeVisible(distanceSlider);
     // DISTANCE LABEL
     distanceLabel.setJustificationType(juce::Justification::centred);
     distanceLabel.attachToComponent(&distanceSlider, false);
     addAndMakeVisible(distanceLabel);
+}
 
-    // XY PAD
+void PluginEditor::setupXYPad()
+{
     xyPad.registerSlider(&azimuthSlider, juce::Gui::XYPad::Axis::X);
     xyPad.registerSlider(&distanceSlider, juce::Gui::XYPad::Axis::Y);
     xyPad.onDistanceChanged = [this](double distance)
@@ -63,94 +166,4 @@ PluginEditor::PluginEditor(PluginProcessor &p)
         audioProcessor.apvts.getParameter("azimuth")->setValueNotifyingHost((float)(angleDegrees + 180.0f) / 360.0f);
     };
     addAndMakeVisible(xyPad);
-
-    // GAIN METER
-    addAndMakeVisible(levelMeter);
-
-    setSize(440, 510);
-    // setResizable(true, true);
-
-    startTimer(24);
-
-    audioProcessor.apvts.addParameterListener("azimuth", this);
-    audioProcessor.apvts.addParameterListener("elevation", this);
-}
-
-PluginEditor::~PluginEditor()
-{
-    audioProcessor.apvts.removeParameterListener("azimuth", this);
-    audioProcessor.apvts.removeParameterListener("elevation", this);
-}
-
-//==============================================================================
-void PluginEditor::paint(juce::Graphics &g)
-{
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
-    // Set the background color to a predefined color from juce::Colours
-    g.fillAll(juce::Colours::blueviolet);
-}
-
-void PluginEditor::resized()
-{
-    // Get the local bounds and reduce them for padding
-    auto container = getLocalBounds().reduced(20); // Remove 20 pixels from each side for padding
-
-    // Set the height for the knobs (set to a reasonable value)
-    const int knobHeight = 100; // Fixed height for the knobs
-    const int padding = 10;     // Space between the knobs and the XY pad
-
-    // Calculate the width for each knob
-    auto knobWidth = (container.getWidth() - 60) / 3; // Divide the width into three equal parts
-
-    // Set bounds for each slider (knob) in the specified order
-    azimuthSlider.setBounds(container.removeFromLeft(knobWidth).withHeight(knobHeight + 20).reduced(padding));
-    elevationSlider.setBounds(container.removeFromLeft(knobWidth).withHeight(knobHeight).reduced(padding));
-    distanceSlider.setBounds(container.removeFromLeft(knobWidth).withHeight(knobHeight + 20).reduced(padding));
-
-    // Set the bounds for the XY pad below the knobs
-    // Position the XY pad directly below the knobs, taking into account the height and padding
-    xyPad.setBounds(0, knobHeight + padding + 20, getWidth() - 60, getWidth() - 60);
-    auto meterWidth = 60;
-    levelMeter.setBounds(380, 0, meterWidth, getHeight());
-}
-
-void PluginEditor::timerCallback()
-{
-    DBG(levelMeter.leftLevel);
-    levelMeter.leftLevel = audioProcessor.getRMSValue(0);
-    levelMeter.rightLevel = audioProcessor.getRMSValue(1);
-    levelMeter.repaint();
-}
-
-void PluginEditor::parameterChanged(const juce::String &parameterID, float newValue)
-{
-    if (parameterID == "elevation")
-        elevationSlider.setValue(newValue);
-    else if (parameterID == "azimuth")
-        azimuthSlider.setValue(newValue);
-}
-
-void PluginEditor::sliderValueChanged(juce::Slider *slider)
-{
-    if (slider == &distanceSlider)
-    {
-        audioProcessor.distanceValue = (float)distanceSlider.getValue();
-    }
-}
-
-void PluginEditor::mouseDoubleClick(const juce::MouseEvent &event)
-{
-    if (event.eventComponent == &distanceSlider)
-    {
-        distanceSlider.setValue(-60.0f, juce::sendNotification);
-    }
-    else if (event.eventComponent == &elevationSlider)
-    {
-        elevationSlider.setValue(0.0f, juce::sendNotification);
-    }
-    else if (event.eventComponent == &azimuthSlider)
-    {
-        azimuthSlider.setValue(0.0f, juce::sendNotification);
-    }
 }
