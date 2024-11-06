@@ -2,6 +2,10 @@
 
 An audio plugin for creating immersive 3D spatial sound experiences using Head-Related Transfer Function (HRTF) processing. This plugin allows audio positioning in three-dimensional space through azimuth and elevation control, enabling enhanced realism for spatial audio applications such as VR, games, and music production.
 
+<img src="https://github.com/Amphicheiras/3D-Spatial-Audio/github/spatialAudioC.png" alt="center" width="700">
+<img src="https://github.com/Amphicheiras/3D-Spatial-Audio/github/spatialAudioL.png" alt="left" width="700">
+<img src="https://github.com/Amphicheiras/3D-Spatial-Audio/github/spatialAudioR.png" alt="right" width="700">
+
 ## Features
 
 - Azimuth & Elevation Controls: Real-time control over sound source direction using azimuth (horizontal angle) and elevation (vertical angle).
