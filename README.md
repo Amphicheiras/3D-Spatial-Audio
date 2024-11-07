@@ -58,9 +58,9 @@ An audio plugin for creating immersive 3D spatial sound experiences using Head-R
 
 ### Code Overview
 
-- AudioPluginAudioProcessor: Main processor class, handles the audio processing pipeline, HRTF convolution, and parameter updates.
+- PluginProcessor: Main processor class, handles the audio processing pipeline, HRTF convolution, and parameter updates.
+- PluginEditor: User interface setup, handles slider controls for spatial parameters and connects UI elements with the audio processor.
 - HRTFProcessor: Responsible for loading HRTF files based on azimuth/elevation and preparing IRs for convolution.
-- AudioPluginAudioProcessorEditor: User interface setup, handles slider controls for spatial parameters and connects UI elements with the audio processor.
 
 ### HRTF Processing Details
 
@@ -68,9 +68,9 @@ The plugin uses HRTF (Head-Related Transfer Function) data to model sound source
 
 ### Parameters
 Parameter	Description	Range
-Azimuth	Horizontal angle	-180° to 180°
-Elevation	Vertical angle	-20° to 20°
-Distance	Distance-based attenuation	-60 dB to 0 dB
+- Azimuth	Horizontal angle	-180° to 180°
+- Elevation	Vertical angle	-20° to 20°
+- Distance	Distance-based attenuation	-60 dB to 0 dB
 
 ### Contributing
 
@@ -88,7 +88,7 @@ This project is licensed under the GNU GPL-3.0 License - see the LICENSE file fo
 
 Special thanks to the open-source audio community and JUCE for their continuous support and resources.
 
-Super special thanks to Jan Wilczek!
+Super special thanks to Christos Konstantas and Jan Wilczek!
 
 # Useful Links
 - [3D Audio Demo](https://www.youtube.com/watch?v=a4mpK_2koR4&t=425s)
