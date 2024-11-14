@@ -14,6 +14,7 @@ An audio plugin for creating immersive 3D spatial sound experiences using Head-R
 - Distance-Based Attenuation: Simulates distance by controlling gain levels, allowing dynamic volume adjustments based on the source's proximity.
 - HRTF Convolution Processing: Utilizes impulse responses (IRs) based on HRTF data for accurate spatialization of audio.
 - Real-Time Parameter Updates: Changes to azimuth, elevation, and distance are applied in real-time with low latency.
+- Stereo peak level metering for instant monitoring of the plugin's effect on the left and right channel volumes.
 - User-Friendly Interface: Intuitive controls for adjusting spatial parameters within the plugin editor.
 
 ## Getting Started
