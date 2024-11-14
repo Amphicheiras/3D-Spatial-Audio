@@ -159,7 +159,7 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     buffer.applyGain(juce::Decibels::decibelsToGain(distanceValue));
 
     // ! A T T E N T I O N !
-    buffer.applyGain(17.5f);
+    buffer.applyGain(7.5f);
     // ! / ! / ! / ! / ! / !
 
     // Reset peak levels to find the max peak in the current block
