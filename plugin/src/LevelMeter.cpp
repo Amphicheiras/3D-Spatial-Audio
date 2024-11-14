@@ -32,26 +32,48 @@ namespace juce::Gui
             leftLevel = 0.0f;
         }
         float normalizedLevel = (leftLevel + gainRange) / gainRange; // normalize to 0-1
-        int rectHeight = static_cast<int>(normalizedLevel * getHeight());
-        g.setColour(juce::Colours::blueviolet.darker(0.9f).darker(0.9f));
-        g.fillRect(10, 0, meterWidth, getHeight());
-        // Change color based on level
-        juce::Colour meterColor = juce::Colours::green;
-        if (leftLevel > -6.0f)
+                                                                     // green section is (-gain range, -6dB]
+        int greenHeight = 0;
+        if (leftLevel <= -6.0f)
         {
-            meterColor = juce::Colours::orange;
+            greenHeight = (int)(normalizedLevel * getHeight());
         }
+        else
+        {
+            greenHeight = (int)(((-6.f + gainRange) / gainRange) * getHeight());
+        }
+        g.setColour(juce::Colours::green);
+        g.fillRect(10, getHeight() - greenHeight, meterWidth, greenHeight);
+
+        // draw the orange section (-6dB, -3dB]
+        int orangeHeight = 0;
+        if (leftLevel > -6.0f && leftLevel <= -3.0f)
+        {
+            orangeHeight = (int)(normalizedLevel * getHeight());
+            g.setColour(juce::Colours::orange);
+            g.fillRect(10, getHeight() - orangeHeight, meterWidth, orangeHeight - greenHeight);
+        }
+        else if (leftLevel > -3.f)
+        {
+            orangeHeight = (int)(((-3.f + gainRange) / gainRange) * getHeight());
+            g.setColour(juce::Colours::orange);
+            g.fillRect(10, getHeight() - orangeHeight, meterWidth, orangeHeight - greenHeight);
+        }
+
+        // draw the red section (-3dB, 0dB]
+        int redHeight = 0;
         if (leftLevel > -3.0f)
         {
-            meterColor = juce::Colours::red;
+            redHeight = (int)(normalizedLevel * getHeight());
+            g.setColour(juce::Colours::red);
+            g.fillRect(10, getHeight() - redHeight, meterWidth, redHeight - orangeHeight);
         }
-        g.setColour(meterColor);
-        g.fillRect(10, getHeight() - rectHeight, meterWidth, rectHeight);
 
         // *************** right level meter ***************
         // draw meter background line
         g.setColour(juce::Colours::blueviolet.darker(0.9f).darker(0.9f));
         g.fillRect(20 + meterWidth, 0, meterWidth, getHeight());
+
         // draw meter level line
         rightLevel = 20.0f * log10f(std::max(rightLevel, 1e-6f)); // avoid log(0)
         // clamp level to gain range
@@ -61,48 +83,43 @@ namespace juce::Gui
         }
         // normalize to 0-1
         normalizedLevel = (rightLevel + gainRange) / gainRange;
-        rectHeight = (int)(normalizedLevel * getHeight());
 
-        //// ! //////////////////////////////////////////
-
-        // Change color based on level
-        meterColor = juce::Colours::green;
-        if (rightLevel > -6.0f)
+        // green section is (-gain range, -6dB]
+        greenHeight = 0;
+        if (rightLevel <= -6.0f)
         {
-            meterColor = juce::Colours::orange;
+            greenHeight = (int)(normalizedLevel * getHeight());
         }
-        if (rightLevel > -3.0f)
+        else
         {
-            meterColor = juce::Colours::red;
+            greenHeight = (int)(((-6.f + gainRange) / gainRange) * getHeight());
         }
-        g.setColour(meterColor);
-        g.fillRect(20 + meterWidth, getHeight() - rectHeight, meterWidth, rectHeight);
-
-        //// ! //////////////////////////////////////////
-
-        // draw green level (up to -6 dB)
-        int greenHeight = getHeight();
-        // green section is (-gain range, -6 dB]
-        greenHeight = (int)(normalizedLevel * getHeight());
         g.setColour(juce::Colours::green);
         g.fillRect(20 + meterWidth, getHeight() - greenHeight, meterWidth, greenHeight);
-        // // Draw the orange section (from -6 dB to -3 dB)
-        // int orangeHeight = 0;
-        // if (rightLevel > -6.0f && rightLevel <= -3.0f)
-        // {
-        //     orangeHeight = (int)(((-3.0f + gainRange) / gainRange) * getHeight());
-        // }
-        // g.setColour(juce::Colours::orange);
-        // // g.fillRect(20 + meterWidth, getHeight() - orangeHeight, meterWidth, getHeight() - greenHeight - orangeHeight);
 
-        // Draw the red section (above -3 dB)
-        int redHeight = 0;
+        // draw the orange section (-6dB, -3dB]
+        orangeHeight = 0;
+        if (rightLevel > -6.0f && rightLevel <= -3.0f)
+        {
+            orangeHeight = (int)(normalizedLevel * getHeight());
+            g.setColour(juce::Colours::orange);
+            g.fillRect(20 + meterWidth, getHeight() - orangeHeight, meterWidth, orangeHeight - greenHeight);
+        }
+        else if (rightLevel > -3.f)
+        {
+            orangeHeight = (int)(((-3.f + gainRange) / gainRange) * getHeight());
+            g.setColour(juce::Colours::orange);
+            g.fillRect(20 + meterWidth, getHeight() - orangeHeight, meterWidth, orangeHeight - greenHeight);
+        }
+
+        // draw the red section (-3dB, 0dB]
+        redHeight = 0;
         if (rightLevel > -3.0f)
         {
-            redHeight = (int)(((-0.0f + gainRange) / gainRange) * getHeight());
+            redHeight = (int)(normalizedLevel * getHeight());
+            g.setColour(juce::Colours::red);
+            g.fillRect(20 + meterWidth, getHeight() - redHeight, meterWidth, redHeight - orangeHeight);
         }
-        g.setColour(juce::Colours::red);
-        g.fillRect(20 + meterWidth, getHeight() - redHeight, meterWidth, redHeight);
     }
 
     void LevelMeter::resized()
