@@ -29,6 +29,7 @@ target_sources(${PROJECT_NAME}
         ${INCLUDE_DIR}/XYPad.h
         ${INCLUDE_DIR}/HRTFProcessor.h
         ${INCLUDE_DIR}/LevelMeter.h
+        ${INCLUDE_DIR}/CustomLookAndFeel.h
 )
 
 target_include_directories(${PROJECT_NAME}
