@@ -45,7 +45,7 @@ public:
 
     // ? *************************************************************  ? //
 
-    float getRMSValue(const int channel) const;
+    float getPeakLevel(int channel);
 
     void loadImpulseResponseFromSliders(float azimuth, float elevation);
 
@@ -58,8 +58,8 @@ public:
 
 private:
     juce::LinearSmoothedValue<float>
-        rmsLevelLeft,
-        rmsLevelRight;
+        leftPeakLevel,
+        rightPeakLevel;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginProcessor)

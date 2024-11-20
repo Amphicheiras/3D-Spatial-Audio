@@ -11,7 +11,7 @@ PluginEditor::PluginEditor(PluginProcessor &p)
     // GAIN METER
     addAndMakeVisible(levelMeter);
 
-    setSize(440, 510);
+    setSize(appWidth, appHeight);
     // setResizable(true, true);
     startTimer(24);
 
@@ -30,10 +30,12 @@ PluginEditor::~PluginEditor()
 //==============================================================================
 void PluginEditor::paint(juce::Graphics &g)
 {
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
-    // Set the background color to a predefined color from juce::Colours
-    g.fillAll(juce::Colours::blueviolet);
+    g.fillAll(juce::Colours::black);
+
+    // draw the purple circle speaker space
+    g.setColour(juce::Colours::blueviolet);
+    g.drawEllipse(ellipseX, ellipseY, ellipseDiameter, ellipseDiameter, lineWidth);
 }
 
 void PluginEditor::resized()
@@ -53,18 +55,18 @@ void PluginEditor::resized()
     elevationSlider.setBounds(container.removeFromLeft(knobWidth).withHeight(knobHeight).reduced(padding));
     distanceSlider.setBounds(container.removeFromLeft(knobWidth).withHeight(knobHeight + 20).reduced(padding));
 
-    // Set the bounds for the XY pad below the knobs
-    // Position the XY pad directly below the knobs, taking into account the height and padding
-    xyPad.setBounds(0, knobHeight + padding + 20, getWidth() - 60, getWidth() - 60);
-    auto meterWidth = 60;
-    levelMeter.setBounds(380, 0, meterWidth, getHeight());
+    // adjust XY pad bounds to fit inside the ellipse
+    float xyPadX = ellipseX + lineOffset;
+    float xyPadY = ellipseY + lineOffset;
+    float xyPadDiameter = ellipseDiameter - lineWidth; // Subtract line width for inner bounds
+    xyPad.setBounds((int)xyPadX, (int)xyPadY, (int)xyPadDiameter, (int)xyPadDiameter);
+    levelMeter.setBounds(appWidth - meterWidth, 0, meterWidth, getHeight());
 }
 
 void PluginEditor::timerCallback()
 {
-    // DBG(levelMeter.leftLevel);
-    levelMeter.leftLevel = audioProcessor.getRMSValue(0);
-    levelMeter.rightLevel = audioProcessor.getRMSValue(1);
+    levelMeter.leftLevel = audioProcessor.getPeakLevel(0);
+    levelMeter.rightLevel = audioProcessor.getPeakLevel(1);
     levelMeter.repaint();
 }
 
@@ -103,6 +105,10 @@ void PluginEditor::mouseDoubleClick(const juce::MouseEvent &event)
 void PluginEditor::setupSliders()
 {
     // AZIMUTH SLIDER
+    customLookAndFeel = std::make_unique<CustomLookAndFeel>();
+    azimuthSlider.setColour(juce::Slider::textBoxBackgroundColourId, juce::Colours::wheat);
+    azimuthSlider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::black);
+    azimuthSlider.setLookAndFeel(customLookAndFeel.get());
     azimuthSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
     azimuthSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, true, 60, 20);
     azimuthSlider.setRange(-180.0f, 180.0f, 5.0f);
@@ -114,11 +120,15 @@ void PluginEditor::setupSliders()
     };
     addAndMakeVisible(azimuthSlider);
     // AZIMUTH LABEL
+    azimuthLabel.setColour(juce::Label::textColourId, juce::Colours::wheat);
     azimuthLabel.setJustificationType(juce::Justification::centred);
     azimuthLabel.attachToComponent(&azimuthSlider, false);
     addAndMakeVisible(azimuthLabel);
 
     // ELEVATION SLIDER
+    elevationSlider.setLookAndFeel(customLookAndFeel.get());
+    elevationSlider.setColour(juce::Slider::textBoxBackgroundColourId, juce::Colours::wheat);
+    elevationSlider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::black);
     elevationSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
     elevationSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, true, 60, 20);
     elevationSlider.setRange(-20.0f, 20.0f, 10.0f);
@@ -130,11 +140,15 @@ void PluginEditor::setupSliders()
     };
     addAndMakeVisible(elevationSlider);
     // ELEVATION LABEL
+    elevationLabel.setColour(juce::Label::textColourId, juce::Colours::wheat);
     elevationLabel.setJustificationType(juce::Justification::centred);
     elevationLabel.attachToComponent(&elevationSlider, false);
     addAndMakeVisible(elevationLabel);
 
     // DISTANCE SLIDER
+    distanceSlider.setLookAndFeel(customLookAndFeel.get());
+    distanceSlider.setColour(juce::Slider::textBoxBackgroundColourId, juce::Colours::wheat);
+    distanceSlider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::black);
     distanceSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
     distanceSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, true, 60, 20);
     distanceSlider.setRange(-13.0, 0.0, 0.1);
@@ -147,6 +161,7 @@ void PluginEditor::setupSliders()
     };
     addAndMakeVisible(distanceSlider);
     // DISTANCE LABEL
+    distanceLabel.setColour(juce::Label::textColourId, juce::Colours::wheat);
     distanceLabel.setJustificationType(juce::Justification::centred);
     distanceLabel.attachToComponent(&distanceSlider, false);
     addAndMakeVisible(distanceLabel);

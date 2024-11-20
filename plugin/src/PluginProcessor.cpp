@@ -94,11 +94,11 @@ void PluginProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
     convolutionProcessor.prepare(spec);
     loadImpulseResponseFromSliders(0, 0);
 
-    rmsLevelLeft.reset(sampleRate, 0.5);
-    rmsLevelRight.reset(sampleRate, 0.5);
+    leftPeakLevel.reset(sampleRate, 0.5);
+    rightPeakLevel.reset(sampleRate, 0.5);
 
-    rmsLevelLeft.setCurrentAndTargetValue(-60.0f);
-    rmsLevelRight.setCurrentAndTargetValue(-60.0f);
+    leftPeakLevel.setCurrentAndTargetValue(-60.0f);
+    rightPeakLevel.setCurrentAndTargetValue(-60.0f);
 }
 
 void PluginProcessor::releaseResources()
@@ -159,30 +159,39 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     buffer.applyGain(juce::Decibels::decibelsToGain(distanceValue));
 
     // ! A T T E N T I O N !
-    buffer.applyGain(4.5f);
+    buffer.applyGain(7.5f);
     // ! / ! / ! / ! / ! / !
 
-    // level meters
-    const auto numSamples = buffer.getNumSamples();
-    rmsLevelLeft.skip(numSamples);
-    rmsLevelRight.skip(numSamples);
-    // Left Channel Peak Level
+    // Reset peak levels to find the max peak in the current block
+    float maxLeftPeak = 0.0f;
+    float maxRightPeak = 0.0f;
+
+    // Loop through each sample in the buffer to find the peak levels
+    for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
     {
-        const auto peakValue = juce::Decibels::gainToDecibels(buffer.getMagnitude(0, 0, numSamples));
-        if (peakValue < rmsLevelLeft.getCurrentValue())
-            rmsLevelLeft.setTargetValue(peakValue);
-        else
-            rmsLevelLeft.setCurrentAndTargetValue(peakValue);
+        const float *channelData = buffer.getReadPointer(channel);
+
+        // Calculate the peak for the current channel
+        float channelPeak = 0.0f;
+        for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+        {
+            channelPeak = std::max(channelPeak, std::abs(channelData[sample]));
+        }
+
+        // Assign peak to the respective channel
+        if (channel == 0)
+            maxLeftPeak = channelPeak;
+        else if (channel == 1)
+            maxRightPeak = channelPeak;
     }
 
-    // Right Channel Peak Level
-    {
-        const auto peakValue = juce::Decibels::gainToDecibels(buffer.getMagnitude(1, 0, numSamples));
-        if (peakValue < rmsLevelRight.getCurrentValue())
-            rmsLevelRight.setTargetValue(peakValue);
-        else
-            rmsLevelRight.setCurrentAndTargetValue(peakValue);
-    }
+    // Update smoothed values
+    leftPeakLevel.setTargetValue(maxLeftPeak);
+    rightPeakLevel.setTargetValue(maxRightPeak);
+
+    // Advance smoothing to gradually reduce the peaks over time
+    leftPeakLevel.skip(buffer.getNumSamples());
+    rightPeakLevel.skip(buffer.getNumSamples());
 }
 
 //==============================================================================
@@ -219,20 +228,6 @@ juce::AudioProcessor *JUCE_CALLTYPE createPluginFilter()
     return new PluginProcessor();
 }
 
-float PluginProcessor::getRMSValue(const int channel) const
-{
-    jassert(channel == 0 || channel == 1);
-    if (channel == 0)
-    {
-        return rmsLevelLeft.getCurrentValue();
-    }
-    if (channel == 1)
-    {
-        return rmsLevelRight.getCurrentValue();
-    }
-    return -1;
-}
-
 void PluginProcessor::loadImpulseResponseFromSliders(float azimuth, float elevation)
 {
     convolutionProcessor.loadImpulseResponse(hrtfProcessor.loadHRTFFile(azimuth, elevation),
@@ -240,4 +235,14 @@ void PluginProcessor::loadImpulseResponseFromSliders(float azimuth, float elevat
                                              juce::dsp::Convolution::Trim::yes,
                                              0,
                                              juce::dsp::Convolution::Normalise::yes);
+}
+
+float PluginProcessor::getPeakLevel(int channel)
+{
+    if (channel == 0)
+        return leftPeakLevel.getNextValue();
+    else if (channel == 1)
+        return rightPeakLevel.getNextValue();
+    else
+        return 0.0f; // if channel index is invalid
 }
